@@ -1,0 +1,6 @@
+@eDitari_HostAddress = http://localhost:5102
+
+GET {{eDitari_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
