@@ -24,5 +24,17 @@ CREATE TABLE Attendance (
     Status NVARCHAR(50),
     FOREIGN KEY (StudentId) REFERENCES Students(StudentId)
 );
-
+CREATE TABLE Subjects (
+    SubjectId INT PRIMARY KEY IDENTITY,
+    Name NVARCHAR(100),
+    TeacherId INT,
+    FOREIGN KEY (TeacherId) REFERENCES Teachers(TeacherId)
+);
+CREATE TABLE Teachers (
+    TeacherId INT PRIMARY KEY IDENTITY,
+    Name NVARCHAR(100),
+    Surname NVARCHAR(100),
+    Email NVARCHAR(100),
+    Phone NVARCHAR(50)
+);
 
