@@ -37,4 +37,10 @@ CREATE TABLE Teachers (
     Email NVARCHAR(100),
     Phone NVARCHAR(50)
 );
-
+CREATE TABLE Parents (
+    ParentId INT PRIMARY KEY IDENTITY,
+    Name NVARCHAR(100),
+    Surname NVARCHAR(100),
+    Email NVARCHAR(100),
+    Phone NVARCHAR(50)
+);
