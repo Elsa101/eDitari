@@ -44,3 +44,35 @@ CREATE TABLE Parents (
     Email NVARCHAR(100),
     Phone NVARCHAR(50)
 );
+
+
+CREATE TABLE StudentParent (
+    StudentId INT,
+    ParentId INT,
+    PRIMARY KEY (StudentId, ParentId),
+    FOREIGN KEY (StudentId) REFERENCES Students(StudentId),
+    FOREIGN KEY (ParentId) REFERENCES Parents(ParentId)
+);
+
+
+
+CREATE TABLE Comments (
+    CommentId INT PRIMARY KEY IDENTITY,
+    StudentId INT,
+    TeacherId INT,
+    CommentText NVARCHAR(1000),
+    Date DATE,
+    FOREIGN KEY (StudentId) REFERENCES Students(StudentId),
+    FOREIGN KEY (TeacherId) REFERENCES Teachers(TeacherId)
+);
+
+
+
+
+CREATE TABLE Staff (
+    StaffId INT PRIMARY KEY IDENTITY,
+    Name NVARCHAR(100),
+    Role NVARCHAR(50), -- shembull: "Admin", "Teacher"
+    Username NVARCHAR(100),
+    PasswordHash NVARCHAR(255)
+);
