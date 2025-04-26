@@ -1,4 +1,4 @@
-namespace editariAPI.Models
+namespace Editari.Models
 {
     public class Student
     {
@@ -11,7 +11,7 @@ namespace editariAPI.Models
         public string Address { get; set; } = string.Empty;
     }
 }
-namespace editariAPI.Models
+namespace Editari.Models
 {
     public class Grade
     {
@@ -20,5 +20,15 @@ namespace editariAPI.Models
         public string Subject { get; set; } = string.Empty;
         public decimal GradeValue { get; set; }
         public DateTime Date { get; set; }
+    }
+}
+namespace Editari.Models
+{
+  public class Attendance
+    {
+        public int AttendanceId { get; set; }
+        public int StudentId { get; set; }
+        public DateTime Date { get; set; }
+        public required string Status { get; set; }
     }
 }
