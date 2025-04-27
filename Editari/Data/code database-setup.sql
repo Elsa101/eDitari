@@ -64,13 +64,10 @@ CREATE TABLE Comments (
     FOREIGN KEY (TeacherId) REFERENCES Teachers(TeacherId)
 );
 
-
-
-
 CREATE TABLE Staff (
     StaffId INT PRIMARY KEY IDENTITY,
     Name NVARCHAR(100),
-    Role NVARCHAR(50), -- shembull: "Admin", "Teacher"
+    Role NVARCHAR(50), 
     Username NVARCHAR(100),
     PasswordHash NVARCHAR(255)
 );
