@@ -22,7 +22,7 @@ namespace editariAPI.Models
         public DateTime Date { get; set; }
     }
 }
-amespace editariAPI.Models
+namespace editariAPI.Models
 {
     public class Teacher
     {
@@ -55,3 +55,4 @@ namespace editariAPI.Models
         public string Phone { get; set; } = string.Empty;
     }
 }
+ 
