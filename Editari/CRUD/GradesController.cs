@@ -14,7 +14,7 @@ namespace Editari.Controllers
 
         public GradesController(AppDbContext context)
         {
-            _context = Convert;
+            _context = context;
         }
 
         [HttpGet]

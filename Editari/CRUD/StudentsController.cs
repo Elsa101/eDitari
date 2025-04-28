@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Editari.Data;
 using Microsoft.EntityFrameworkCore;
 using Editari.Models;
-
+                                         
 namespace Editari.Controllers
 {
     [ApiController]
