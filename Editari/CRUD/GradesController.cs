@@ -11,7 +11,7 @@ namespace Editari.Controllers
     {
         private readonly AppDbContext _context;
 
-        public GradesController(AppDbContext _context)
+        public GradesController(AppDbContext context)
         {
             _context = context;
         }
