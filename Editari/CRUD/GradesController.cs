@@ -9,9 +9,9 @@ namespace Editari.Controllers
     [Route("api/[controller]")]
     public class GradesController : ControllerBase
     {
-        private readonly EditariDbContext _context;
+        private readonly AppDbContext _context;
 
-        public GradesController(EditariDbContext context)
+        public GradesController(AppDbContext _context)
         {
             _context = context;
         }
