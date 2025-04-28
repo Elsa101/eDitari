@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Editari.Data;
 using Editari.Models;
+using System;
 
 namespace Editari.Controllers
 {
@@ -13,7 +14,7 @@ namespace Editari.Controllers
 
         public GradesController(AppDbContext _context)
         {
-            _context = context;
+            _context = Convert;
         }
 
         [HttpGet]
