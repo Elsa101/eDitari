@@ -11,7 +11,7 @@ CREATE TABLE Students (
 CREATE TABLE Grades (
     GradeId INT PRIMARY KEY IDENTITY,
     StudentId INT,
-    Subject NVARCHAR(100), -- lendet duhet me u lidh me tabelen e notimit, permes ni tabele te re
+    Subject NVARCHAR(100),
     GradeValue DECIMAL(5,2),
     Date DATE,
     FOREIGN KEY (StudentId) REFERENCES Students(StudentId)
@@ -21,7 +21,7 @@ CREATE TABLE Attendance (
     AttendanceId INT PRIMARY KEY IDENTITY,
     StudentId INT,
     Date DATE,
-    Status NVARCHAR(50), -- tabele ne vete 
+    Status NVARCHAR(50),  
     FOREIGN KEY (StudentId) REFERENCES Students(StudentId)
 );
 CREATE TABLE Subjects (
@@ -70,7 +70,7 @@ CREATE TABLE Comments (
 CREATE TABLE Staff (
     StaffId INT PRIMARY KEY IDENTITY,
     Name NVARCHAR(100),
-    Role NVARCHAR(50), -- shembull: "Admin", "Teacher"
+    Role NVARCHAR(50),
     Username NVARCHAR(100),
     PasswordHash NVARCHAR(255)
 );
