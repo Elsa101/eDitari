@@ -1,0 +1,60 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Editari.Data;
+using Editari.Models;
+
+namespace Editari.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ParentsController : ControllerBase
+    {
+        private readonly EditariDbContext _context;
+
+        public ParentsController(EditariDbContext context)
+        {
+            _context = context;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Parent>>> GetAll()
+        {
+            return await _context.Parents.ToListAsync();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Parent>> Get(int id)
+        {
+            var parent = await _context.Parents.FindAsync(id);
+            if (parent == null) return NotFound();
+            return parent;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Parent>> Post(Parent parent)
+        {
+            _context.Parents.Add(parent);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(Get), new { id = parent.ParentId }, parent);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, Parent parent)
+        {
+            if (id != parent.ParentId) return BadRequest();
+            _context.Entry(parent).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var parent = await _context.Parents.FindAsync(id);
+            if (parent == null) return NotFound();
+            _context.Parents.Remove(parent);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+    }
+}
