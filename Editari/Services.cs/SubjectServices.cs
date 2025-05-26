@@ -44,7 +44,7 @@ namespace eDitari.Services
 
             return new SubjectDto
             {
-                Id = Editari.Models.Subject.Id,
+                SubjectId = subject.SubjectId,
                 Name = subject.Name
             };
         }
