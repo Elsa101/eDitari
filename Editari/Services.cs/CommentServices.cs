@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eDitari.Services
 {
-    public class CommentService(AppDbContext context) : ICommentService
+    public class CommentService(AppDbContext context) : ICommentsService
     {
         private readonly AppDbContext _context = context;
 
