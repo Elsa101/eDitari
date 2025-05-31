@@ -1,0 +1,56 @@
+/* App.css */
+
+/* Set a light blue background for the whole app */
+body, html, #root {
+  height: 100%;
+  margin: 0;
+  background-color: #e7f1ff; /* very light blue */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Style for the container wrapping the login form */
+.login-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
+}
+
+/* Title style */
+.login-title {
+  color: #007bff; /* bootstrap primary blue */
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Labels */
+.form-label {
+  color: #0056b3; /* darker blue */
+}
+
+/* Input focus */
+.form-control:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
+}
+
+/* Error message */
+.alert-danger {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+/* Login button */
+.btn-primary {
+  background-color: #0056b3;
+  border-color: #004085;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #004085;
+  border-color: #002752;
+}
