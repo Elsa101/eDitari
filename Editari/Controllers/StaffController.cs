@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Editari.Data;
 using Editari.Models;
+using eDitari.Dtos; // Add this to use RegisterStaffDto
+using BCrypt.Net;   // For password hashing
 
 namespace Editari.Controllers
 {
@@ -55,6 +57,31 @@ namespace Editari.Controllers
             _context.Staff.Remove(staff);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        // ✅ NEW REGISTRATION ENDPOINT
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterStaffDto dto)
+        {
+            if (await _context.Staff.AnyAsync(s => s.Username == dto.Username))
+            {
+                return BadRequest("Username already exists.");
+            }
+
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+            var newStaff = new Staff
+            {
+                Name = dto.Name,
+                Role = dto.Role,
+                Username = dto.Username,
+                PasswordHash = passwordHash
+            };
+
+            _context.Staff.Add(newStaff);
+            await _context.SaveChangesAsync();
+
+            return Ok("Registration successful.");
         }
     }
 }

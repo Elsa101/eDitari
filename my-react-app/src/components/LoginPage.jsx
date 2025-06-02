@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
+import { login } from '../services/authService';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Example check - replace with your API call
-    if (email === 'admin@test.com' && password === 'admin') {
-      alert('Login successful!');
-    } else {
-      setError('Invalid email or password');
+    setError(''); // Clear previous error
+
+    try {
+      const token = await login(email, password);  // Call API
+      localStorage.setItem('token', token);        // Save token
+      alert('Login successful! Token saved.');     // Show success alert instead of redirect
+    } catch (err) {
+      setError(err.message || 'Login failed');     // Show error message
     }
   };
 
