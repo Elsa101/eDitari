@@ -1,6 +1,6 @@
 namespace eDitari.Dtos
 {
-    public class StaffDTO
+    public class StaffDto
     {
         public int StaffId { get; set; }
         public string Name { get; set; } = string.Empty;
