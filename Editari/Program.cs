@@ -1,34 +1,27 @@
-using System;
 using Microsoft.EntityFrameworkCore;
+using Editari.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Lidhja me databazën MSSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+// Lidhja me databazën MSSQL duke përdorur AppDbContext
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Shtojmë Controllerat dhe Swagger
+// Controllers + Swagger
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
-WebApplication app = builder.Build();
+var app = builder.Build();
 
-// Konfiguro pipeline
+// Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();  // Mund ta lëmë koment për thjeshtësi
+// app.UseHttpsRedirection(); // opsionale
 app.UseAuthorization();
+
 app.MapControllers();
 app.Run();
-
-// Placeholder for ApplicationDbContext
-internal class ApplicationDbContext : DbContext
-{
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-    }
-}
