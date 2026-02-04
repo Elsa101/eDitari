@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Editari.Data;
 using Microsoft.EntityFrameworkCore;
 using Editari.Models;
+using Microsoft.AspNetCore.Authorization;
+
                                          
 namespace Editari.Controllers
 {
@@ -15,6 +17,14 @@ namespace Editari.Controllers
         {
             _context = context;
         }
+
+        [Authorize]
+        [HttpGet("secure-test")]
+        public IActionResult SecureTest()
+{
+        return Ok("🎉 Authorized! Token works.");
+}
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Student>>> GetAll()

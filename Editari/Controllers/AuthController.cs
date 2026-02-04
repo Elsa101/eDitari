@@ -22,35 +22,23 @@ namespace Editari.Controllers
             _config = config;
         }
 
-        [HttpPost("login")]
+       [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
-        {
-            if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest("Username dhe Password janë të detyrueshme.");
+       {
+         var teacher = await _context.Teachers
+        .FirstOrDefaultAsync(t => t.Email == dto.Username);
 
-            var staff = await _context.Staff
-                .FirstOrDefaultAsync(s => s.Username == dto.Username);
+    if (teacher == null)
+        return Unauthorized("Kredenciale të pasakta.");
 
-            if (staff == null)
-                return Unauthorized("Kredenciale të pasakta.");
+    var token = CreateJwtToken(teacher.TeacherId, teacher.Email, "Teacher");
 
-            // ✅ Për momentin: krahasim direkt.
-            // NËSE në DB PasswordHash mban plain password, kjo punon menjëherë.
-            if (staff.PasswordHash != dto.Password)
-                return Unauthorized("Kredenciale të pasakta.");
-
-            // Nëse Role është bosh, i japim Staff si default
-            var role = string.IsNullOrWhiteSpace(staff.Role) ? "Staff" : staff.Role;
-
-            var token = CreateJwtToken(staff.StaffId, staff.Username, role);
-
-            return Ok(new
-            {
-                accessToken = token,
-                role
-            });
-        }
-
+    return Ok(new
+    {
+        accessToken = token,
+        role = "Teacher"
+    });
+}
         private string CreateJwtToken(int staffId, string username, string role)
         {
             var jwt = _config.GetSection("Jwt");
