@@ -17,7 +17,6 @@ namespace Editari.Controllers
             _context = context;
         }
  
-        // DTO për regjistrim me password plain (ne e hash-ojmë në backend)
         public class RegisterParentDto
         {
             public string Name { get; set; } = string.Empty;
@@ -27,7 +26,6 @@ namespace Editari.Controllers
             public string Password { get; set; } = string.Empty;
         }
  
-        // ✅ REGISTER endpoint (ruan PasswordHash me BCrypt)
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterParentDto dto)
         {

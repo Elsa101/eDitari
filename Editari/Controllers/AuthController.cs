@@ -25,7 +25,6 @@ namespace Editari.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            // 1) Staff login (Teacher/Admin/Staff) - përdor Username
             var staff = await _context.Staff
                 .FirstOrDefaultAsync(s => s.Username == dto.Username);
 
@@ -64,8 +63,6 @@ namespace Editari.Controllers
                     userType = "Parent"
                 });
             }
-
-            // ❗ shumë e rëndësishme
             return Unauthorized("Kredenciale të pasakta.");
         }
 
