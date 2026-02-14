@@ -9,9 +9,9 @@ namespace Editari.Controllers
     [Route("api/[controller]")]
     public class CommentsController : ControllerBase
     {
-        private readonly EditariDbContext _context;
+        private readonly AppDbContext _context;
 
-        public CommentsController(EditariDbContext context)
+        public CommentsController(AppDbContext context)
         {
             _context = context;
         }
