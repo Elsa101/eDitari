@@ -3,12 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using Editari.Data;
 using Editari.Models;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Editari.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class GradesController : ControllerBase
+    [Authorize(Roles = "Staff")]
+        public class GradesController : ControllerBase
     {
         private readonly AppDbContext _context;
 
