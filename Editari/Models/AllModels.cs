@@ -21,6 +21,10 @@ namespace Editari.Models
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
 
+        public string PasswordHash { get; set; } = string.Empty;
+
+        
+
         public ICollection<StudentParent> StudentParents { get; set; } = new List<StudentParent>();
     }
 

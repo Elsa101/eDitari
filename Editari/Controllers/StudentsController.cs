@@ -9,6 +9,8 @@ namespace Editari.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+
+    [Authorize(Roles = "Staff")]
     public class StudentsController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -18,7 +20,6 @@ namespace Editari.Controllers
             _context = context;
         }
 
-        [Authorize]
         [HttpGet("secure-test")]
         public IActionResult SecureTest()
 {

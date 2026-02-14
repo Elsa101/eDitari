@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Editari.Data;
 using Editari.Models;
+using BCrypt.Net;
 
 namespace Editari.Controllers
 {
@@ -9,11 +10,41 @@ namespace Editari.Controllers
     [Route("api/[controller]")]
     public class ParentsController : ControllerBase
     {
-        private readonly EditariDbContext _context;
+        private readonly AppDbContext _context;
 
-        public ParentsController(EditariDbContext context)
+        public ParentsController(AppDbContext context)
         {
             _context = context;
+        }
+
+        public class RegisterParentDto
+        {
+            public string Name { get; set; } = string.Empty;
+            public string Surname { get; set; } = string.Empty;
+            public string Email { get; set; } = string.Empty;
+            public string Phone { get; set; } = string.Empty;
+            public string Password { get; set; } = string.Empty;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterParentDto dto)
+        {
+            if (await _context.Parents.AnyAsync(p => p.Email == dto.Email))
+                return BadRequest("Email already exists.");
+
+            var parent = new Parent
+            {
+                Name = dto.Name,
+                Surname = dto.Surname,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            };
+
+            _context.Parents.Add(parent);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { parent.ParentId, parent.Email });
         }
 
         [HttpGet]

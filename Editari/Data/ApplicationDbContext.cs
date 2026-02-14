@@ -12,7 +12,7 @@ namespace Editari.Data
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
-        public DbSet<Parent> Parents { get; set; }
+public DbSet<Editari.Models.Parent> Parents { get; set; }
         public DbSet<StudentParent> StudentParents { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Staff> Staff { get; set; }
