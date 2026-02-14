@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Editari.Models
 {
     public class Student
@@ -46,6 +48,7 @@ namespace Editari.Models
         public DateTime Date { get; set; }
     }
 
+    [Table("Attendance")]
     public class Attendance
     {
         public int AttendanceId { get; set; }

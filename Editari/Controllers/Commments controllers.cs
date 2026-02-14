@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Editari.Data;
 using Editari.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Editari.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Staff")]
+
     public class CommentsController : ControllerBase
     {
         private readonly AppDbContext _context;
