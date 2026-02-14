@@ -81,7 +81,7 @@ namespace Editari.Controllers
             _context.Subjects.Remove(subject);
             await _context.SaveChangesAsync();
  
-            return NoContent();
+            
         }
     }
 }
