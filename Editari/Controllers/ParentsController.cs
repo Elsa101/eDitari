@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Editari.Data;
 using Editari.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
  
 namespace Editari.Controllers
 {
@@ -89,5 +91,60 @@ namespace Editari.Controllers
  
             return Ok(children);
         }
+        // ---------------- PARENT AREA ----------------
+ 
+[Authorize(Roles = "Parent")]
+[HttpGet("my-children")]
+public async Task<IActionResult> MyChildren()
+{
+    var parentIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (string.IsNullOrEmpty(parentIdStr))
+        return Unauthorized("ParentId missing in token.");
+ 
+    var parentId = int.Parse(parentIdStr);
+ 
+    var children = await _context.StudentParents
+        .Where(sp => sp.ParentId == parentId)
+        .Select(sp => new
+        {
+            sp.Student.StudentId,
+            sp.Student.Name,
+            sp.Student.Surname
+        })
+        .ToListAsync();
+ 
+    return Ok(children);
+}
+ 
+[Authorize(Roles = "Parent")]
+[HttpGet("my-children/grades")]
+public async Task<IActionResult> MyChildrenGrades()
+{
+    var parentIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (string.IsNullOrEmpty(parentIdStr))
+        return Unauthorized("ParentId missing in token.");
+ 
+    var parentId = int.Parse(parentIdStr);
+ 
+    var studentIds = await _context.StudentParents
+        .Where(sp => sp.ParentId == parentId)
+        .Select(sp => sp.StudentId)
+        .ToListAsync();
+ 
+    var grades = await _context.Grades
+        .Where(g => studentIds.Contains(g.StudentId))
+        .Select(g => new
+        {
+            g.GradeId,
+            g.StudentId,
+            g.Subject,
+            g.GradeValue,
+            g.Date
+        })
+        .OrderByDescending(g => g.Date)
+        .ToListAsync();
+ 
+    return Ok(grades);
+}
     }
 }
