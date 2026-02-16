@@ -30,6 +30,7 @@ namespace Editari.Models
         public ICollection<StudentParent> StudentParents { get; set; } = new List<StudentParent>();
     }
 
+    [Table("StudentParent")]
     public class StudentParent
     {
         public int StudentId { get; set; }
