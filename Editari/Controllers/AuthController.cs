@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Editari.Data;
 using Editari.Dtos.Auth;
+using Editari.Models; // ✅ add this
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -36,17 +37,32 @@ namespace Editari.Controllers
 
                 var token = CreateJwtToken(staff.StaffId, staff.Username, staff.Role);
 
+                // ✅ NEW: create + save refresh token for staff
+                var staffRefreshToken = Guid.NewGuid().ToString();
+                var staffRtEntity = new RefreshToken
+                {
+                    Token = staffRefreshToken,
+                    StaffId = staff.StaffId,
+                    ParentId = null,
+                    ExpiresAt = DateTime.UtcNow.AddDays(7),
+                    IsRevoked = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.RefreshTokens.Add(staffRtEntity);
+                await _context.SaveChangesAsync();
+
                 return Ok(new
                 {
                     accessToken = token,
+                    refreshToken = staffRefreshToken, // ✅ NEW
                     role = staff.Role,
                     userType = "Staff"
                 });
             }
 
-           var parent = await _context.Set<Editari.Models.Parent>()
-    .FirstOrDefaultAsync(p => p.Email == dto.Username);
-
+            var parent = await _context.Set<Parent>()
+                .FirstOrDefaultAsync(p => p.Email == dto.Username);
 
             if (parent != null)
             {
@@ -56,13 +72,30 @@ namespace Editari.Controllers
 
                 var token = CreateJwtToken(parent.ParentId, parent.Email, "Parent");
 
+                // ✅ NEW: create + save refresh token for parent
+                var parentRefreshToken = Guid.NewGuid().ToString();
+                var parentRtEntity = new RefreshToken
+                {
+                    Token = parentRefreshToken,
+                    ParentId = parent.ParentId,
+                    StaffId = null,
+                    ExpiresAt = DateTime.UtcNow.AddDays(7),
+                    IsRevoked = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.RefreshTokens.Add(parentRtEntity);
+                await _context.SaveChangesAsync();
+
                 return Ok(new
                 {
                     accessToken = token,
+                    refreshToken = parentRefreshToken, // ✅ NEW
                     role = "Parent",
                     userType = "Parent"
                 });
             }
+
             return Unauthorized("Kredenciale të pasakta.");
         }
 
