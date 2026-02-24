@@ -180,7 +180,20 @@ public async Task<IActionResult> Refresh([FromBody] RefreshRequestDto dto)
 
 }
  
+ [HttpPost("logout")]
+public async Task<IActionResult> Logout([FromBody] RefreshRequestDto dto)
+{
+    var rt = await _context.RefreshTokens
+        .FirstOrDefaultAsync(x => x.Token == dto.RefreshToken);
 
+    if (rt == null)
+        return NotFound("Refresh token nuk u gjet.");
+
+    rt.IsRevoked = true;
+    await _context.SaveChangesAsync();
+
+    return Ok("Logout u krye me sukses.");
+}
         private string CreateJwtToken(int userId, string username, string role)
         {
             var jwt = _config.GetSection("Jwt");
