@@ -147,5 +147,74 @@ namespace Editari.Controllers
 
             return Ok(grades);
         }
+                
+
+        [Authorize(Roles = "Parent")]
+[HttpGet("my-children/attendance")]
+public async Task<IActionResult> MyChildrenAttendance()
+{
+    var parentIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (string.IsNullOrEmpty(parentIdStr))
+        return Unauthorized("ParentId missing in token.");
+
+    var parentId = int.Parse(parentIdStr);
+
+    var studentIds = await _context.StudentParents
+        .Where(sp => sp.ParentId == parentId)
+        .Select(sp => sp.StudentId)
+        .ToListAsync();
+
+    var attendance = await _context.Attendances
+        .Where(a => studentIds.Contains(a.StudentId))
+        .Select(a => new
+        {
+            a.AttendanceId,
+            a.StudentId,
+            a.Date,
+            a.Status
+        })
+        .OrderByDescending(a => a.Date)
+        .ToListAsync();
+
+    return Ok(attendance);
+}
+
+        
+    [Authorize(Roles = "Parent")]
+[HttpGet("my-children/comments")]
+public async Task<IActionResult> MyChildrenComments()
+{
+    var parentIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (string.IsNullOrEmpty(parentIdStr))
+        return Unauthorized("ParentId missing in token.");
+
+    var parentId = int.Parse(parentIdStr);
+
+    var studentIds = await _context.StudentParents
+        .Where(sp => sp.ParentId == parentId)
+        .Select(sp => sp.StudentId)
+        .ToListAsync();
+
+    var comments = await _context.Comments
+        .Where(c => studentIds.Contains(c.StudentId))
+        .Select(c => new
+        {
+            c.CommentId,
+            c.StudentId,
+            c.TeacherId,
+            c.CommentText,
+            c.Date
+        })
+        .OrderByDescending(c => c.Date)
+        .ToListAsync();
+
+    return Ok(comments);
+    }
     }
 }
+
+    
+
+        
+
+
