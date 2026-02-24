@@ -98,6 +98,88 @@ namespace Editari.Controllers
 
             return Unauthorized("Kredenciale të pasakta.");
         }
+        [HttpPost("refresh")]
+
+public async Task<IActionResult> Refresh([FromBody] RefreshRequestDto dto)
+
+{
+
+    if (string.IsNullOrWhiteSpace(dto.RefreshToken))
+
+        return BadRequest("Refresh token mungon.");
+ 
+    var rt = await _context.RefreshTokens
+
+        .FirstOrDefaultAsync(x => x.Token == dto.RefreshToken);
+ 
+    if (rt == null)
+
+        return Unauthorized("Refresh token i pavlefshëm.");
+ 
+    if (rt.IsRevoked)
+
+        return Unauthorized("Refresh token është revokuar.");
+ 
+    if (rt.ExpiresAt < DateTime.UtcNow)
+
+        return Unauthorized("Refresh token ka skaduar.");
+ 
+    // ✅ Determine user type + create new access token
+
+    if (rt.StaffId.HasValue)
+
+    {
+
+        var staff = await _context.Staff.FirstOrDefaultAsync(s => s.StaffId == rt.StaffId.Value);
+
+        if (staff == null) return Unauthorized("Përdoruesi nuk u gjet.");
+ 
+        var newAccessToken = CreateJwtToken(staff.StaffId, staff.Username, staff.Role);
+ 
+        return Ok(new
+
+        {
+
+            accessToken = newAccessToken,
+
+            role = staff.Role,
+
+            userType = "Staff"
+
+        });
+
+    }
+ 
+    if (rt.ParentId.HasValue)
+
+    {
+
+        var parent = await _context.Set<Editari.Models.Parent>()
+
+            .FirstOrDefaultAsync(p => p.ParentId == rt.ParentId.Value);
+ 
+        if (parent == null) return Unauthorized("Përdoruesi nuk u gjet.");
+ 
+        var newAccessToken = CreateJwtToken(parent.ParentId, parent.Email, "Parent");
+ 
+        return Ok(new
+
+        {
+
+            accessToken = newAccessToken,
+
+            role = "Parent",
+
+            userType = "Parent"
+
+        });
+
+    }
+ 
+    return Unauthorized("Refresh token nuk është i lidhur me përdorues.");
+
+}
+ 
 
         private string CreateJwtToken(int userId, string username, string role)
         {
