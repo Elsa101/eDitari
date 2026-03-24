@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Login from "./Login";
+import Students from "./Students";
 
 function App() {
   const [token, setToken] = useState(null);
@@ -28,7 +29,7 @@ function App() {
         <div>
       <h1>Dashboard</h1>
       <button onClick={testSecure}>Test Secure Endpoint</button>
-      <p>Ketu do shtojme Students page</p>
+    <Students />
         </div>
       ) : (
         <Login setToken={setToken} />
