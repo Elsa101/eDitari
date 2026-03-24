@@ -7,19 +7,30 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DB
+// -------------------- DB --------------------
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Controllers + Swagger
+// -------------------- Controllers + Swagger --------------------
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// CORS 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "eDitari API", Version = "v1" });
 
-    // ✅ Swagger Bearer Auth
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -83,14 +94,17 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Pipeline
+// -------------------- Pipeline --------------------
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection(); 
+// ❗ shumë e rëndësishme: CORS duhet para auth
+app.UseCors("AllowReactApp");
+
+// app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
