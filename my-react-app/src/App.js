@@ -1,82 +1,40 @@
 import { useState } from "react";
+import Login from "./Login";
 
-export default function App() {
-  const [username, setUsername] = useState("arben.hoxha@example.com");
-  const [password, setPassword] = useState("12345");
-  const [message, setMessage] = useState("");
+function App() {
+  const [token, setToken] = useState(null);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setMessage("Logging in...");
-
+  const testSecure = async () => {
     try {
-      const res = await fetch("http://localhost:5102/api/Auth/login", {
-        method: "POST",
+      const response = await fetch("http://localhost:5102/api/Students/secure-test", {
+        method: "GET",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
         },
-        body: JSON.stringify({ username, password }),
       });
 
-      const text = await res.text(); // lexojmë si text, pastaj provojmë JSON
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = text;
-      }
+      const text = await response.text();
 
-      if (!res.ok) {
-        setMessage(`Error ${res.status}: ${typeof data === "string" ? data : JSON.stringify(data)}`);
-        return;
-      }
-
-      // pritet: { accessToken: "...", role: "Teacher" }
-      const token = data.accessToken;
-      setMessage("✅ Login OK! Token u mor (shiko console).");
-      console.log("TOKEN:", token);
-
-      // ruaje për më vonë (hapi tjetër)
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", data.role ?? "");
-    } catch (err) {
-      setMessage("❌ Network error: " + err.message);
+      alert(text);
+    } catch (error) {
+      console.error(error);
+      alert("Gabim");
     }
   };
 
   return (
-    <div style={{ fontFamily: "Arial", padding: 24, maxWidth: 420 }}>
-      <h2>eDitari - Login (test)</h2>
-
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: 12 }}>
-          <label>Username (Email)</label>
-          <input
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="email"
-          />
+    <div>
+      {token ? (
+        <div>
+      <h1>Dashboard</h1>
+      <button onClick={testSecure}>Test Secure Endpoint</button>
+      <p>Ketu do shtojme Students page</p>
         </div>
-
-        <div style={{ marginBottom: 12 }}>
-          <label>Password</label>
-          <input
-            type="password"
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="password"
-          />
-        </div>
-
-        <button type="submit" style={{ padding: "10px 14px" }}>
-          Login
-        </button>
-      </form>
-
-      <p style={{ marginTop: 16 }}>{message}</p>
-      <small>Token ruhet te localStorage pas login-it.</small>
+      ) : (
+        <Login setToken={setToken} />
+      )}
     </div>
   );
 }
+
+export default App;
