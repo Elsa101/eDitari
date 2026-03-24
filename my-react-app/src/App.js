@@ -9,7 +9,7 @@ function App() {
       const response = await fetch("http://localhost:5102/api/Students/secure-test", {
         method: "GET",
         headers: {
-          Authorization: "Bearer " + token, // 🔥 kjo është pika kryesore
+          Authorization: "Bearer " + token,
         },
       });
 
@@ -26,8 +26,9 @@ function App() {
     <div>
       {token ? (
         <div>
-          <h1>Login u krye me sukses</h1>
-          <button onClick={testSecure}>Test Secure Endpoint</button>
+      <h1>Dashboard</h1>
+      <button onClick={testSecure}>Test Secure Endpoint</button>
+      <p>Ketu do shtojme Students page</p>
         </div>
       ) : (
         <Login setToken={setToken} />
