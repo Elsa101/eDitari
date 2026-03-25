@@ -29,8 +29,7 @@ function App() {
         <div>
       <h1>Dashboard</h1>
       <button onClick={testSecure}>Test Secure Endpoint</button>
-    <Students />
-        </div>
+      <Students token={token} />        </div>
       ) : (
         <Login setToken={setToken} />
       )}
