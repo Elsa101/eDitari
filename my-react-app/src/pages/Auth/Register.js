@@ -57,7 +57,9 @@ const Register = () => {
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data || 'Gabim gjatë regjistrimit');
+      const data = err.response?.data;
+      const errorMessage = typeof data === 'string' ? data : data?.message || data?.error || 'Gabim gjatë regjistrimit';
+      setError(errorMessage);
       setLoading(false);
     }
   };

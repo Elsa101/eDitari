@@ -31,7 +31,8 @@ export const AuthProvider = ({ children }) => {
       setUser({ role, userType });
       return { success: true };
     } catch (error) {
-      const message = error.response?.data || 'Gabim gjatë identifikimit';
+      const data = error.response?.data;
+      const message = typeof data === 'string' ? data : data?.message || data?.error || 'Gabim gjatë identifikimit';
       return { success: false, message };
     }
   };

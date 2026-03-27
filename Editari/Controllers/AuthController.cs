@@ -28,9 +28,12 @@ namespace Editari.Controllers
         {
             try
             {
-                // ── 1. Check Staff table ──
+                // Normalize input: Trim whitespace and handle possible nulls
+                var normalizedUsername = dto.Username?.Trim() ?? string.Empty;
+
+                // ── 1. Check Staff table (Admin/Staff usually Case-Sensitive but we keep it safe) ──
                 var staff = await _context.Staff
-                    .FirstOrDefaultAsync(s => s.Username == dto.Username);
+                    .FirstOrDefaultAsync(s => s.Username == normalizedUsername);
 
                 if (staff != null && BCrypt.Net.BCrypt.Verify(dto.Password, staff.PasswordHash))
                 {
@@ -59,9 +62,10 @@ namespace Editari.Controllers
                     });
                 }
 
-                // ── 2. Check Teacher table (by Username OR Email) ──
+                // ── 2. Check Teacher table (by Username OR Email) - Case-Insensitive ──
                 var teacher = await _context.Teachers
-                    .FirstOrDefaultAsync(t => t.Username == dto.Username || t.Email == dto.Username);
+                    .FirstOrDefaultAsync(t => t.Username.ToLower() == normalizedUsername.ToLower() 
+                                           || t.Email.ToLower() == normalizedUsername.ToLower());
 
                 if (teacher != null && BCrypt.Net.BCrypt.Verify(dto.Password, teacher.PasswordHash))
                 {
@@ -91,9 +95,9 @@ namespace Editari.Controllers
                     });
                 }
 
-                // ── 3. Check Parent table (by Email) ──
-                var parent = await _context.Set<Parent>()
-                    .FirstOrDefaultAsync(p => p.Email == dto.Username);
+                // ── 3. Check Parent table (by Email) - Case-Insensitive ──
+                var parent = await _context.Parents
+                    .FirstOrDefaultAsync(p => p.Email.ToLower() == normalizedUsername.ToLower());
 
                 if (parent != null && BCrypt.Net.BCrypt.Verify(dto.Password, parent.PasswordHash))
                 {

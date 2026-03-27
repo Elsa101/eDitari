@@ -9,6 +9,8 @@ export async function login(email, password) {
     return response.data.token;  // adjust if your backend returns token differently
   } catch (error) {
     // Provide meaningful error message
-    throw new Error(error.response?.data || 'Login failed');
+    const data = error.response?.data;
+    const errorMessage = typeof data === 'string' ? data : data?.message || data?.error || 'Login failed';
+    throw new Error(errorMessage);
   }
 }

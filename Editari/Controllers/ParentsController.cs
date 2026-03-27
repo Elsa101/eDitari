@@ -31,14 +31,16 @@ namespace Editari.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterParentDto dto)
         {
-            if (await _context.Parents.AnyAsync(p => p.Email == dto.Email))
+            var normalizedEmail = dto.Email?.Trim().ToLower() ?? string.Empty;
+
+            if (await _context.Parents.AnyAsync(p => p.Email.ToLower() == normalizedEmail))
                 return BadRequest("Email already exists.");
  
             var parent = new Parent
             {
                 Name = dto.Name,
                 Surname = dto.Surname,
-                Email = dto.Email,
+                Email = normalizedEmail,
                 Phone = dto.Phone,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
