@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Editari.Models;
 
+
 namespace Editari.Data
 {
     public class AppDbContext : DbContext
@@ -12,12 +13,13 @@ namespace Editari.Data
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
-public DbSet<Editari.Models.Parent> Parents { get; set; }
+        public DbSet<Editari.Models.Parent> Parents { get; set; }
         public DbSet<StudentParent> StudentParents { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Staff> Staff { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<SchoolClass> SchoolClasses { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -37,7 +39,9 @@ public DbSet<Editari.Models.Parent> Parents { get; set; }
                 .HasForeignKey(sp => sp.ParentId);
 
             // ---------------- SEED ADMINISTRATORS ----------------
-            var adminHash = "$2y$12$K7v156yY1WqF7A0kR8zUvOhVvG.sEqf5LHAyKgTBTuWbvku30Zc4jb"; // Hashed 'Admin123!'
+            // Valid 60-character BCrypt hash for 'Admin123!' (Cost 11)
+            var adminHash = "$2a$11$fLHLUcoQ7nexmqL29WN1huACCmrjvptuJjk67IOgAWWVOA8XqlIN6"; 
+            
             modelBuilder.Entity<Staff>().HasData(
                 new Staff { StaffId = 1, Name = "Admin 1", Username = "admin1@editari.com", PasswordHash = adminHash, Role = "Admin" },
                 new Staff { StaffId = 2, Name = "Admin 2", Username = "admin2@editari.com", PasswordHash = adminHash, Role = "Admin" },

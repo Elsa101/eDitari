@@ -26,77 +26,84 @@ namespace Editari.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var staff = await _context.Staff
-                .FirstOrDefaultAsync(s => s.Username == dto.Username);
-
-            if (staff != null)
+            try
             {
-                var ok = BCrypt.Net.BCrypt.Verify(dto.Password, staff.PasswordHash);
-                if (!ok)
-                    return Unauthorized("Kredenciale të pasakta.");
+                var staff = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.Username == dto.Username);
 
-                var token = CreateJwtToken(staff.StaffId, staff.Username, staff.Role);
-
-                // ✅ NEW: create + save refresh token for staff
-                var staffRefreshToken = Guid.NewGuid().ToString();
-                var staffRtEntity = new RefreshToken
+                if (staff != null)
                 {
-                    Token = staffRefreshToken,
-                    StaffId = staff.StaffId,
-                    ParentId = null,
-                    ExpiresAt = DateTime.UtcNow.AddDays(7),
-                    IsRevoked = false,
-                    CreatedAt = DateTime.UtcNow
-                };
+                    var ok = BCrypt.Net.BCrypt.Verify(dto.Password, staff.PasswordHash);
+                    if (!ok)
+                        return Unauthorized("Kredenciale të pasakta.");
 
-                _context.RefreshTokens.Add(staffRtEntity);
-                await _context.SaveChangesAsync();
+                    var token = CreateJwtToken(staff.StaffId, staff.Username, staff.Role);
 
-                return Ok(new
+                    // ✅ NEW: create + save refresh token for staff
+                    var staffRefreshToken = Guid.NewGuid().ToString();
+                    var staffRtEntity = new RefreshToken
+                    {
+                        Token = staffRefreshToken,
+                        StaffId = staff.StaffId,
+                        ParentId = null,
+                        ExpiresAt = DateTime.UtcNow.AddDays(7),
+                        IsRevoked = false,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _context.RefreshTokens.Add(staffRtEntity);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        accessToken = token,
+                        refreshToken = staffRefreshToken, // ✅ NEW
+                        role = staff.Role,
+                        userType = "Staff"
+                    });
+                }
+
+                var parent = await _context.Set<Parent>()
+                    .FirstOrDefaultAsync(p => p.Email == dto.Username);
+
+                if (parent != null)
                 {
-                    accessToken = token,
-                    refreshToken = staffRefreshToken, // ✅ NEW
-                    role = staff.Role,
-                    userType = "Staff"
-                });
+                    var ok = BCrypt.Net.BCrypt.Verify(dto.Password, parent.PasswordHash);
+                    if (!ok)
+                        return Unauthorized("Kredenciale të pasakta.");
+
+                    var token = CreateJwtToken(parent.ParentId, parent.Email, "Parent");
+
+                    // ✅ NEW: create + save refresh token for parent
+                    var parentRefreshToken = Guid.NewGuid().ToString();
+                    var parentRtEntity = new RefreshToken
+                    {
+                        Token = parentRefreshToken,
+                        ParentId = parent.ParentId,
+                        StaffId = null,
+                        ExpiresAt = DateTime.UtcNow.AddDays(7),
+                        IsRevoked = false,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _context.RefreshTokens.Add(parentRtEntity);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        accessToken = token,
+                        refreshToken = parentRefreshToken, // ✅ NEW
+                        role = "Parent",
+                        userType = "Parent"
+                    });
+                }
+
+                return Unauthorized("Kredenciale të pasakta.");
             }
-
-            var parent = await _context.Set<Parent>()
-                .FirstOrDefaultAsync(p => p.Email == dto.Username);
-
-            if (parent != null)
+            catch (Exception ex)
             {
-                var ok = BCrypt.Net.BCrypt.Verify(dto.Password, parent.PasswordHash);
-                if (!ok)
-                    return Unauthorized("Kredenciale të pasakta.");
-
-                var token = CreateJwtToken(parent.ParentId, parent.Email, "Parent");
-
-                // ✅ NEW: create + save refresh token for parent
-                var parentRefreshToken = Guid.NewGuid().ToString();
-                var parentRtEntity = new RefreshToken
-                {
-                    Token = parentRefreshToken,
-                    ParentId = parent.ParentId,
-                    StaffId = null,
-                    ExpiresAt = DateTime.UtcNow.AddDays(7),
-                    IsRevoked = false,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _context.RefreshTokens.Add(parentRtEntity);
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    accessToken = token,
-                    refreshToken = parentRefreshToken, // ✅ NEW
-                    role = "Parent",
-                    userType = "Parent"
-                });
+                return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
             }
-
-            return Unauthorized("Kredenciale të pasakta.");
         }
         [HttpPost("refresh")]
 
