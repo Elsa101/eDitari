@@ -64,22 +64,34 @@ function Login({ setToken, setUserData }) {
     setSuccessMsg("");
 
     try {
-      const endpoint = roleMode === "Staff" ? "api/Staff/register" : "api/Parents/register";
-      
-      let payload = {};
-      if (roleMode === "Staff") {
-        payload = {
-            Name: name,
-            Role: staffRole,
-            Username: email, 
-            Password: password
-        };
-      } else {
+      let endpoint;
+      let payload;
+
+      if (roleMode === "Parent") {
+        endpoint = "api/Parents/register";
         payload = {
             Name: name,
             Surname: surname,
             Email: email,
             Phone: phone,
+            Password: password
+        };
+      } else if (staffRole === "Teacher") {
+        endpoint = "api/Teachers/register";
+        payload = {
+            Name: name,
+            Surname: surname,
+            Email: email,
+            Phone: phone,
+            Username: email,
+            Password: password
+        };
+      } else {
+        endpoint = "api/Staff/register";
+        payload = {
+            Name: name,
+            Role: staffRole,
+            Username: email, 
             Password: password
         };
       }
@@ -196,7 +208,7 @@ function Login({ setToken, setUserData }) {
                 />
               </div>
 
-              {roleMode === 'Parent' && (
+              {(roleMode === 'Parent' || staffRole === 'Teacher') && (
                 <>
                   <div className="form-group" style={{ marginBottom: '1rem' }}>
                     <label className="form-label" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Mbiemri</label>

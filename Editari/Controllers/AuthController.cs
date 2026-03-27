@@ -28,18 +28,14 @@ namespace Editari.Controllers
         {
             try
             {
+                // ── 1. Check Staff table ──
                 var staff = await _context.Staff
                     .FirstOrDefaultAsync(s => s.Username == dto.Username);
 
-                if (staff != null)
+                if (staff != null && BCrypt.Net.BCrypt.Verify(dto.Password, staff.PasswordHash))
                 {
-                    var ok = BCrypt.Net.BCrypt.Verify(dto.Password, staff.PasswordHash);
-                    if (!ok)
-                        return Unauthorized("Kredenciale të pasakta.");
-
                     var token = CreateJwtToken(staff.StaffId, staff.Username, staff.Role);
 
-                    // ✅ NEW: create + save refresh token for staff
                     var staffRefreshToken = Guid.NewGuid().ToString();
                     var staffRtEntity = new RefreshToken
                     {
@@ -57,24 +53,52 @@ namespace Editari.Controllers
                     return Ok(new
                     {
                         accessToken = token,
-                        refreshToken = staffRefreshToken, // ✅ NEW
+                        refreshToken = staffRefreshToken,
                         role = staff.Role,
                         userType = "Staff"
                     });
                 }
 
+                // ── 2. Check Teacher table (by Username OR Email) ──
+                var teacher = await _context.Teachers
+                    .FirstOrDefaultAsync(t => t.Username == dto.Username || t.Email == dto.Username);
+
+                if (teacher != null && BCrypt.Net.BCrypt.Verify(dto.Password, teacher.PasswordHash))
+                {
+                    var token = CreateJwtToken(teacher.TeacherId, teacher.Username, "Teacher");
+
+                    var teacherRefreshToken = Guid.NewGuid().ToString();
+                    var teacherRtEntity = new RefreshToken
+                    {
+                        Token = teacherRefreshToken,
+                        TeacherId = teacher.TeacherId,
+                        StaffId = null,
+                        ParentId = null,
+                        ExpiresAt = DateTime.UtcNow.AddDays(7),
+                        IsRevoked = false,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _context.RefreshTokens.Add(teacherRtEntity);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        accessToken = token,
+                        refreshToken = teacherRefreshToken,
+                        role = "Teacher",
+                        userType = "Teacher"
+                    });
+                }
+
+                // ── 3. Check Parent table (by Email) ──
                 var parent = await _context.Set<Parent>()
                     .FirstOrDefaultAsync(p => p.Email == dto.Username);
 
-                if (parent != null)
+                if (parent != null && BCrypt.Net.BCrypt.Verify(dto.Password, parent.PasswordHash))
                 {
-                    var ok = BCrypt.Net.BCrypt.Verify(dto.Password, parent.PasswordHash);
-                    if (!ok)
-                        return Unauthorized("Kredenciale të pasakta.");
-
                     var token = CreateJwtToken(parent.ParentId, parent.Email, "Parent");
 
-                    // ✅ NEW: create + save refresh token for parent
                     var parentRefreshToken = Guid.NewGuid().ToString();
                     var parentRtEntity = new RefreshToken
                     {
@@ -92,12 +116,13 @@ namespace Editari.Controllers
                     return Ok(new
                     {
                         accessToken = token,
-                        refreshToken = parentRefreshToken, // ✅ NEW
+                        refreshToken = parentRefreshToken,
                         role = "Parent",
                         userType = "Parent"
                     });
                 }
 
+                // ── No match found ──
                 return Unauthorized("Kredenciale të pasakta.");
             }
             catch (Exception ex)
@@ -183,6 +208,21 @@ public async Task<IActionResult> Refresh([FromBody] RefreshRequestDto dto)
 
     }
  
+    if (rt.TeacherId.HasValue)
+    {
+        var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.TeacherId == rt.TeacherId.Value);
+        if (teacher == null) return Unauthorized("Përdoruesi nuk u gjet.");
+
+        var newAccessToken = CreateJwtToken(teacher.TeacherId, teacher.Username, "Teacher");
+
+        return Ok(new
+        {
+            accessToken = newAccessToken,
+            role = "Teacher",
+            userType = "Teacher"
+        });
+    }
+
     return Unauthorized("Refresh token nuk është i lidhur me përdorues.");
 
 }

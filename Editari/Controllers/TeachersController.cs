@@ -10,7 +10,7 @@ namespace Editari.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Admin,Teacher")]
     public class TeachersController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -49,9 +49,45 @@ namespace Editari.Controllers
             return teacher;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Teacher>> Post([FromBody] Teacher teacher)
+        // ---------------- REGISTER ----------------
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] eDitari.Dtos.CreateTeacherDTO dto)
         {
+            if (await _context.Teachers.AnyAsync(t => t.Username == dto.Username))
+                return BadRequest("Ky username ekziston tashmë.");
+
+            var teacher = new Teacher
+            {
+                Name = dto.Name,
+                Surname = dto.Surname,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                Username = dto.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            };
+
+            _context.Teachers.Add(teacher);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { teacher.TeacherId, teacher.Username });
+        }
+
+        // ---------------- ADMIN CREATE ----------------
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult<Teacher>> Post([FromBody] eDitari.Dtos.CreateTeacherDTO dto)
+        {
+            var teacher = new Teacher
+            {
+                Name = dto.Name,
+                Surname = dto.Surname,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                Username = dto.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            };
+
             _context.Teachers.Add(teacher);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(Get), new { id = teacher.TeacherId }, teacher);

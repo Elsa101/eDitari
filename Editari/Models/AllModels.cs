@@ -68,6 +68,10 @@ namespace Editari.Models
         public string Surname { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
+        
+        // Login credentials
+        public string Username { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
     }
  
     public class Subject
@@ -115,6 +119,7 @@ namespace Editari.Models
  
         public int? ParentId { get; set; }
         public int? StaffId { get; set; }
+        public int? TeacherId { get; set; }
  
         [Required]
         public string Token { get; set; } = string.Empty;

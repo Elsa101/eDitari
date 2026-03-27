@@ -52,6 +52,8 @@ namespace eDitari.Services
                 throw new ArgumentException("Email-i nuk mund të jetë bosh.");
             if (string.IsNullOrWhiteSpace(dto.Phone))
                 throw new ArgumentException("Numri i telefonit nuk mund të jetë bosh.");
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                throw new ArgumentException("Fjalëkalimi nuk mund të jetë bosh.");
 
             var emailExists = await _context.Parents.AnyAsync(p => p.Email == dto.Email);
             if (emailExists)
@@ -66,7 +68,8 @@ namespace eDitari.Services
                 Name = dto.Name,
                 Surname = dto.Surname,
                 Email = dto.Email,
-                Phone = dto.Phone
+                Phone = dto.Phone,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
 
             _context.Parents.Add(parent);

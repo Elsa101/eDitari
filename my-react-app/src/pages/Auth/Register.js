@@ -34,12 +34,22 @@ const Register = () => {
           password: formData.password
         };
         await api.post('/Parents/register', parentData);
+      } else if (role === 'Teacher') {
+        const teacherData = {
+          name: formData.name,
+          surname: formData.surname,
+          email: formData.email,
+          phone: formData.phone,
+          username: formData.username,
+          password: formData.password
+        };
+        await api.post('/Teachers/register', teacherData);
       } else {
         const staffData = {
           name: formData.name,
           username: formData.username,
           password: formData.password,
-          role: role // Admin ose Teacher
+          role: role // Admin
         };
         await api.post('/Staff/register', staffData);
       }
@@ -146,7 +156,7 @@ const Register = () => {
             </div>
           </div>
 
-          {role === 'Parent' && (
+          {(role === 'Parent' || role === 'Teacher') && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <div className="form-group">
                 <label className="label">Mbiemri</label>

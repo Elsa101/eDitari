@@ -51,14 +51,14 @@ namespace Editari.Controllers
  
         // ---------------- STAFF CRUD ----------------
  
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Parent>>> GetAll()
         {
             return await _context.Parents.ToListAsync();
         }
  
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Parent>> Get(int id)
         {
@@ -67,7 +67,7 @@ namespace Editari.Controllers
             return parent;
         }
  
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff,Teacher")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Parent parent)
         {

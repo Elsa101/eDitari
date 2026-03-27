@@ -53,7 +53,9 @@ namespace eDitari.Services
                 Name = dto.Name,
                 Surname = dto.Surname,
                 Email = dto.Email,
-                Phone = dto.Phone
+                Phone = dto.Phone,
+                Username = dto.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
 
             _context.Teachers.Add(teacher);
