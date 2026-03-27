@@ -10,6 +10,7 @@ namespace Editari.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class StaffController : ControllerBase
     {
         private readonly AppDbContext _context;

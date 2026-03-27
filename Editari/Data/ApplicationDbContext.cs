@@ -35,6 +35,14 @@ public DbSet<Editari.Models.Parent> Parents { get; set; }
                 .HasOne(sp => sp.Parent)
                 .WithMany(p => p.StudentParents)
                 .HasForeignKey(sp => sp.ParentId);
+
+            // ---------------- SEED ADMINISTRATORS ----------------
+            var adminHash = "$2y$12$K7v156yY1WqF7A0kR8zUvOhVvG.sEqf5LHAyKgTBTuWbvku30Zc4jb"; // Hashed 'Admin123!'
+            modelBuilder.Entity<Staff>().HasData(
+                new Staff { StaffId = 1, Name = "Admin 1", Username = "admin1@editari.com", PasswordHash = adminHash, Role = "Admin" },
+                new Staff { StaffId = 2, Name = "Admin 2", Username = "admin2@editari.com", PasswordHash = adminHash, Role = "Admin" },
+                new Staff { StaffId = 3, Name = "Admin 3", Username = "admin3@editari.com", PasswordHash = adminHash, Role = "Admin" }
+            );
         }
     }
 }
