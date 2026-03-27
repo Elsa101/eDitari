@@ -51,14 +51,14 @@ namespace Editari.Controllers
  
         // ---------------- STAFF CRUD ----------------
  
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Parent>>> GetAll()
         {
             return await _context.Parents.ToListAsync();
         }
  
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Parent>> Get(int id)
         {
@@ -67,7 +67,7 @@ namespace Editari.Controllers
             return parent;
         }
  
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Parent parent)
         {
@@ -79,7 +79,7 @@ namespace Editari.Controllers
             return NoContent();
         }
  
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -210,8 +210,84 @@ public async Task<IActionResult> MyChildrenComments()
  
     return Ok(comments);
     }
+
+    // ---------------- NEW: LINK STUDENT ----------------
+
+    public class LinkStudentDto
+    {
+        public int StudentId { get; set; }
+        public string LinkCode { get; set; } = string.Empty;
+    }
+
+    [Authorize(Roles = "Parent")]
+    [HttpPost("link-student")]
+    public async Task<IActionResult> LinkStudent([FromBody] LinkStudentDto dto)
+    {
+        var parentIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(parentIdStr))
+            return Unauthorized("ParentId missing in token.");
+
+        var parentId = int.Parse(parentIdStr);
+
+        var student = await _context.Students
+            .FirstOrDefaultAsync(s => s.StudentId == dto.StudentId && s.LinkCode == dto.LinkCode);
+
+        if (student == null)
+            return BadRequest("ID-ja e nxënësit ose Kodi i Lidhjes është i pasaktë.");
+
+        var alreadyLinked = await _context.StudentParents
+            .AnyAsync(sp => sp.StudentId == dto.StudentId && sp.ParentId == parentId);
+
+        if (alreadyLinked)
+            return BadRequest("Ky fëmijë është tashmë i lidhur me llogarinë tuaj.");
+
+        var link = new StudentParent
+        {
+            StudentId = dto.StudentId,
+            ParentId = parentId
+        };
+
+        _context.StudentParents.Add(link);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Fëmija u lidh me sukses!", studentName = $"{student.Name} {student.Surname}" });
+    }
+
+    // ---------------- NEW: GET TEACHERS ----------------
+
+    [Authorize(Roles = "Parent")]
+    [HttpGet("my-children/teachers")]
+    public async Task<IActionResult> GetMyChildrenTeachers()
+    {
+        var parentIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(parentIdStr))
+            return Unauthorized("ParentId missing in token.");
+
+        var parentId = int.Parse(parentIdStr);
+
+        var studentIds = await _context.StudentParents
+            .Where(sp => sp.ParentId == parentId)
+            .Select(sp => sp.StudentId)
+            .ToListAsync();
+
+        // Join Students -> Subjects -> Teachers
+        var teachers = await _context.Subjects
+            .Where(s => _context.Grades.Any(g => g.StudentId != 0 && studentIds.Contains(g.StudentId) && g.Subject == s.Name) || 
+                        _context.Comments.Any(c => studentIds.Contains(c.StudentId) && c.TeacherId == s.TeacherId))
+            // Simplified: return all teachers associated with subjects (assuming students have subjects)
+            // But subjects don't have a direct link to students in this model, they are linked via TeacherId and maybe Grade.Subject string.
+            // Let's get teachers from all subjects for now, or from comments.
+            .Select(s => new
+            {
+                s.TeacherId,
+                TeacherName = _context.Teachers.Where(t => t.TeacherId == s.TeacherId).Select(t => t.Name + " " + t.Surname).FirstOrDefault(),
+                SubjectName = s.Name,
+                Email = _context.Teachers.Where(t => t.TeacherId == s.TeacherId).Select(t => t.Email).FirstOrDefault()
+            })
+            .Distinct()
+            .ToListAsync();
+
+        return Ok(teachers);
+    }
     }
 }
- 
-   
- 

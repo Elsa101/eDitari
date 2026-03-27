@@ -4,6 +4,7 @@ using Editari.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace eDitari.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260325205541_AddLinkCodeToStudent")]
+    partial class AddLinkCodeToStudent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,23 +165,6 @@ namespace eDitari.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("Editari.Models.SchoolClass", b =>
-                {
-                    b.Property<int>("ClassId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassId"));
-
-                    b.Property<string>("ClassName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ClassId");
-
-                    b.ToTable("SchoolClasses");
-                });
-
             modelBuilder.Entity("Editari.Models.Staff", b =>
                 {
                     b.Property<int>("StaffId")
@@ -186,9 +172,6 @@ namespace eDitari.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StaffId"));
-
-                    b.Property<int?>("ClassId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -208,8 +191,6 @@ namespace eDitari.Migrations
 
                     b.HasKey("StaffId");
 
-                    b.HasIndex("ClassId");
-
                     b.ToTable("Staff");
                 });
 
@@ -224,9 +205,6 @@ namespace eDitari.Migrations
                     b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ClassId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
@@ -252,8 +230,6 @@ namespace eDitari.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StudentId");
-
-                    b.HasIndex("ClassId");
 
                     b.ToTable("Students");
                 });
@@ -322,24 +298,6 @@ namespace eDitari.Migrations
                     b.ToTable("Teachers");
                 });
 
-            modelBuilder.Entity("Editari.Models.Staff", b =>
-                {
-                    b.HasOne("Editari.Models.SchoolClass", "Class")
-                        .WithMany("StaffMembers")
-                        .HasForeignKey("ClassId");
-
-                    b.Navigation("Class");
-                });
-
-            modelBuilder.Entity("Editari.Models.Student", b =>
-                {
-                    b.HasOne("Editari.Models.SchoolClass", "Class")
-                        .WithMany("Students")
-                        .HasForeignKey("ClassId");
-
-                    b.Navigation("Class");
-                });
-
             modelBuilder.Entity("Editari.Models.StudentParent", b =>
                 {
                     b.HasOne("Editari.Models.Parent", "Parent")
@@ -362,13 +320,6 @@ namespace eDitari.Migrations
             modelBuilder.Entity("Editari.Models.Parent", b =>
                 {
                     b.Navigation("StudentParents");
-                });
-
-            modelBuilder.Entity("Editari.Models.SchoolClass", b =>
-                {
-                    b.Navigation("StaffMembers");
-
-                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("Editari.Models.Student", b =>

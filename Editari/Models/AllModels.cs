@@ -12,7 +12,11 @@ namespace Editari.Models
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
+        public string LinkCode { get; set; } = string.Empty;
  
+        public int? ClassId { get; set; }
+        public SchoolClass? Class { get; set; }
+
         public ICollection<StudentParent> StudentParents { get; set; } = new List<StudentParent>();
     }
  
@@ -89,6 +93,19 @@ namespace Editari.Models
         public string Role { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
+
+        public int? ClassId { get; set; }
+        public SchoolClass? Class { get; set; }
+    }
+
+    public class SchoolClass
+    {
+        [Key]
+        public int ClassId { get; set; }
+        public string ClassName { get; set; } = string.Empty;
+
+        public ICollection<Student> Students { get; set; } = new List<Student>();
+        public ICollection<Staff> StaffMembers { get; set; } = new List<Staff>();
     }
  
   

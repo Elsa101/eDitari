@@ -17,6 +17,7 @@ public DbSet<Editari.Models.Parent> Parents { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Staff> Staff { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<SchoolClass> SchoolClasses { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

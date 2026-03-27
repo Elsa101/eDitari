@@ -16,7 +16,7 @@ namespace Editari.Controllers
 
     [Route("api/[controller]")]
 
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Admin,Teacher")]
 
     public class StudentParentsController : ControllerBase
 

@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Editari.Data;
 using Editari.Models;
-using eDitari.Dtos; // Add this to use RegisterStaffDto
-using BCrypt.Net;   // For password hashing
+using eDitari.Dtos;
+using BCrypt.Net;
 
 namespace Editari.Controllers
 {

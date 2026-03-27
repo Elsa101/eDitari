@@ -2,5 +2,14 @@
   "dependencies": {
     "axios": "^1.9.0",
     "react-router-dom": "^7.6.1"
+  },
+  "scripts": {
+    "start": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd my-react-app && npm start",
+    "dev:backend": "cd Editari && dotnet run"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

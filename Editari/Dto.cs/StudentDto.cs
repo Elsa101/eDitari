@@ -10,6 +10,7 @@ namespace eDitari.Dtos
         public required string Email { get; set; }
         public required string Phone { get; set; }
         public string? Address { get; set; }
+        public string? LinkCode { get; set; }
 
         
         public object? Id { get; internal set; }
