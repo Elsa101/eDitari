@@ -1,0 +1,166 @@
+/* Students.css */
+
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --text-dark: #2d3436;
+  --accent-color: #6c5ce7;
+}
+
+.students-container {
+    padding: 2rem;
+    animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header-dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: var(--glass-bg);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+.header-info h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+
+.managed-class-info {
+    margin: 0.3rem 0 0 0;
+    font-size: 0.95rem;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.plus-icon {
+    font-size: 1.4rem;
+    font-weight: 400;
+}
+
+.add-btn {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.add-btn:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 25px rgba(108, 92, 231, 0.3);
+}
+
+/* Glass Table Styles */
+.table-wrapper {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.premium-table th {
+    background: rgba(248, 249, 250, 0.5);
+    padding: 1.5rem 1rem;
+    color: #636e72;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.premium-table td {
+    padding: 1.2rem 1rem;
+    color: var(--text-dark);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.premium-table tr:hover {
+    background: rgba(108, 92, 231, 0.03);
+}
+
+.class-badge {
+    background: #dfe6e9;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #2d3436;
+}
+
+.link-code-box {
+    background: #f1f2f6;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    border: 1px dashed #b2bec3;
+}
+
+/* Modal Enhancements */
+.modal-overlay {
+    background: rgba(45, 52, 54, 0.4);
+    backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+}
+
+.form-field label {
+    font-weight: 600;
+    color: #636e72;
+    margin-bottom: 0.5rem;
+}
+
+.form-field input, .premium-select {
+    width: 100%;
+    padding: 0.9rem;
+    border: 2px solid #f1f2f6;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: #f9f9f9;
+}
+
+.form-field input:focus, .premium-select:focus {
+    border-color: #6c5ce7;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+    outline: none;
+}
+
+.action-btns .edit-btn { background: #eef2ff; color: #4f46e5; }
+.action-btns .delete-btn { background: #fff1f2; color: #e11d48; }
+
+.save-btn {
+    background: var(--primary-gradient);
+    padding: 0.8rem 2rem;
+}
