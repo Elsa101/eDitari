@@ -308,8 +308,8 @@ export default function AdminDashboard() {
                     placeholder="Kërko prind..."
                   />
                   <SearchDrop
-                    label="Mësuesi (opsionale)"
-                    items={staff.filter(s => s.type === 'staff')}
+                    label="Mësuesi Përgjegjës"
+                    items={staff}
                     valueKey="id"
                     displayFn={s=>`${s.name} (${s.role})`}
                     value={studentForm.staffId}
