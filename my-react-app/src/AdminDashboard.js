@@ -77,6 +77,9 @@ export default function AdminDashboard() {
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [studentForm,    setStudentForm]    = useState(emptyForm);
 
+  const [showAddTeacher, setShowAddTeacher] = useState(false);
+  const [teacherForm,    setTeacherForm]    = useState({name: '', username: '', password: '', role: 'Staff'});
+
   const [detailStudent, setDetailStudent] = useState(null); // modal for student details
 
   const [assignTarget,  setAssignTarget]  = useState(null);
@@ -156,6 +159,20 @@ export default function AdminDashboard() {
       flash(setMsg, `✅ ${ns.name} ${ns.surname} u shtua! ID:${ns.studentId} | Kodi:${ns.linkCode}`);
       setShowAddStudent(false);
       setStudentForm(emptyForm);
+      fetchAll();
+    } catch (e) { flash(setMsg, e.response?.data || e.message, 'error'); }
+  };
+
+  /* ── add teacher ────────────────────── */
+  const handleTeacherChange = e => setTeacherForm(p => ({ ...p, [e.target.name]: e.target.value }));
+
+  const handleAddTeacher = async e => {
+    e.preventDefault();
+    try {
+      await api.post('/Staff/register', teacherForm);
+      flash(setMsg, `✅ Mësuesi ${teacherForm.name} u shtua me sukses!`);
+      setShowAddTeacher(false);
+      setTeacherForm({name: '', username: '', password: '', role: 'Staff'});
       fetchAll();
     } catch (e) { flash(setMsg, e.response?.data || e.message, 'error'); }
   };
@@ -374,8 +391,37 @@ export default function AdminDashboard() {
       {/* ══ TEACHERS ══ */}
       {tab==='teachers' && (
         <div className="tab-panel">
-          <h2>Mësuesit ({staff.length})</h2>
+          <div className="panel-actions">
+            <h2>Mësuesit ({staff.length})</h2>
+            <button className="btn-primary" onClick={()=>setShowAddTeacher(v=>!v)}>
+              {showAddTeacher?'✕ Mbyll':'+ Regjistro Mësues'}
+            </button>
+          </div>
           <p className="hint">Kliko mbi mësuesin për të parë nxënësit e tij.</p>
+
+          {/* TEACHER REGISTRATION FORM */}
+          {showAddTeacher && (
+            <div className="add-form-box">
+              <h3>🧑‍🏫 Regjistrim Mësuesi</h3>
+              <form onSubmit={handleAddTeacher} className="student-form">
+                <div className="form-row">
+                  <F label="Emri i Plotë *" name="name" value={teacherForm.name} onChange={handleTeacherChange} required />
+                  <F label="Username/Email *" name="username" value={teacherForm.username} onChange={handleTeacherChange} required />
+                </div>
+                <div className="form-row">
+                  <F label="Fjalëkalimi *" name="password" type="password" value={teacherForm.password} onChange={handleTeacherChange} required />
+                  <div className="form-field">
+                    <label>Roli</label>
+                    <select name="role" value={teacherForm.role} onChange={handleTeacherChange} className="premium-input-field" style={{padding: '0.6rem 1rem', border: '1px solid #e2e8f0', borderRadius:'10px'}}>
+                      <option value="Staff">Mësues (Staff)</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" className="btn-primary" style={{alignSelf:'flex-start', marginTop: '1rem'}}>✅ Regjistro</button>
+              </form>
+            </div>
+          )}
+
           {staff.length===0 ? <Empty text="Nuk ka mësues." /> : (
             <div className="teachers-layout">
               <div className="teacher-list-col">
