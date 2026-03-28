@@ -17,6 +17,8 @@ namespace Editari.Models
         public int? ClassId { get; set; }
         public SchoolClass? Class { get; set; }
 
+        public int? TeacherId { get; set; } // The teacher who registered or manages this student
+
         public ICollection<StudentParent> StudentParents { get; set; } = new List<StudentParent>();
     }
  
@@ -48,7 +50,7 @@ namespace Editari.Models
         public int GradeId { get; set; }
         public int StudentId { get; set; }
         public string Subject { get; set; } = string.Empty;
-        public decimal GradeValue { get; set; }
+        public int GradeValue { get; set; }
         public DateTime Date { get; set; }
     }
  

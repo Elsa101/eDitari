@@ -27,6 +27,7 @@ namespace Editari.Controllers
             public string Address { get; set; } = string.Empty;
             public int? ClassId { get; set; }
             public int? ParentId { get; set; }
+            public int? TeacherId { get; set; } // The responsible teacher
         }
 
         public StudentsController(AppDbContext context)
@@ -55,15 +56,10 @@ namespace Editari.Controllers
             if ((userRole == "Staff" || userRole == "Teacher") && !string.IsNullOrEmpty(userIdStr))
             {
                 var staffId = int.Parse(userIdStr);
-                var staff = await _context.Staff.FindAsync(staffId);
                 
-                if (staff == null || !staff.ClassId.HasValue)
-                {
-                    return Ok(new List<Student>());
-                }
-
+                // Show students registered by this specific teacher
                 return await _context.Students
-                    .Where(s => s.ClassId == staff.ClassId.Value)
+                    .Where(s => s.TeacherId == staffId)
                     .ToListAsync();
             }
 
@@ -85,6 +81,10 @@ namespace Editari.Controllers
                     s.Phone,
                     s.Address,
                     s.ClassId,
+                    s.TeacherId,
+                    TeacherName = _context.Staff.Where(st => st.StaffId == s.TeacherId).Select(st => st.Name).FirstOrDefault()
+                                 ?? _context.Teachers.Where(t => t.TeacherId == s.TeacherId).Select(t => t.Name + " " + t.Surname).FirstOrDefault()
+                                 ?? "—",
                     s.LinkCode,
                     Parents = _context.StudentParents
                         .Where(sp => sp.StudentId == s.StudentId)
@@ -107,6 +107,16 @@ namespace Editari.Controllers
         [HttpPost]
         public async Task<ActionResult<Student>> Post(StudentCreateDto dto)
         {
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int? teacherIdToAssign = dto.TeacherId;
+
+            // Automation for Teachers/Staff: set themselves as the owner
+            if ((userRole == "Staff" || userRole == "Teacher") && !string.IsNullOrEmpty(userIdStr))
+            {
+                teacherIdToAssign = int.Parse(userIdStr);
+            }
+
             var student = new Student
             {
                 Name = dto.Name,
@@ -115,6 +125,7 @@ namespace Editari.Controllers
                 Email = dto.Email,
                 Phone = dto.Phone,
                 Address = dto.Address,
+                TeacherId = teacherIdToAssign,
                 ClassId = dto.ClassId,
                 LinkCode = Guid.NewGuid().ToString().ToUpper().Substring(0, 8)
             };

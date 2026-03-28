@@ -59,6 +59,10 @@ namespace Editari.Controllers
         {
             var staff = await _context.Staff.FindAsync(id);
             if (staff == null) return NotFound();
+
+            // Remove related RefreshTokens directly
+            await _context.RefreshTokens.Where(rt => rt.StaffId == id).ExecuteDeleteAsync();
+
             _context.Staff.Remove(staff);
             await _context.SaveChangesAsync();
             return NoContent();

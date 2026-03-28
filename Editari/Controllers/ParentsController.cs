@@ -87,10 +87,18 @@ namespace Editari.Controllers
         {
             var parent = await _context.Parents.FindAsync(id);
             if (parent == null) return NotFound();
- 
+
+            // 1. Remove related RefreshTokens directly
+            await _context.RefreshTokens.Where(rt => rt.ParentId == id).ExecuteDeleteAsync();
+
+            // 2. Remove related StudentParent links directly
+            await _context.StudentParents.Where(sp => sp.ParentId == id).ExecuteDeleteAsync();
+
+            // 3. Remove the Parent
             _context.Parents.Remove(parent);
+            
             await _context.SaveChangesAsync();
- 
+
             return NoContent();
         }
  

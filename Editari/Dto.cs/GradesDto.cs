@@ -7,7 +7,7 @@ namespace eDitari.Dtos
         public int GradeId { get; set; }
         public int StudentId { get; set; }
         public string Subject { get; set; } = string.Empty;
-        public decimal GradeValue { get; set; }
+        public required int GradeValue { get; set; }
         public DateTime Date { get; set; }
     }
 }

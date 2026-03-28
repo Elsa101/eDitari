@@ -39,31 +39,45 @@ export default function ParentDashboard() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [cRes, gRes, aRes, cmRes] = await Promise.all([
-        api.get('/Parents/my-children'),
-        api.get('/Parents/my-children/grades'),
-        api.get('/Parents/my-children/attendance'),
-        api.get('/Parents/my-children/comments'),
-      ]);
-      setChildren(cRes.data);
-      setGrades(gRes.data);
-      setAttendance(aRes.data);
-      setComments(cmRes.data);
+      // Fetch each resource individually to prevent one failure from blocking others
+      const fetchSafe = async (url, setter) => {
+        try {
+          const res = await api.get(url);
+          setter(res.data);
+          return res.data;
+        } catch (err) {
+          console.error(`Failed to fetch ${url}:`, err);
+          return [];
+        }
+      };
 
-      // Build notifications from new grades, absences, comments
+      const [cData, gData, aData, cmData] = await Promise.all([
+        fetchSafe('/Parents/my-children', setChildren),
+        fetchSafe('/Parents/my-children/grades', setGrades),
+        fetchSafe('/Parents/my-children/attendance', setAttendance),
+        fetchSafe('/Parents/my-children/comments', setComments),
+      ]);
+
+      console.log('DEBUG: Received children:', cData);
+      setChildren(cData);
+      setGrades(gData);
+      setAttendance(aData);
+      setComments(cmData);
+
+      // Build notifications from whatever data we got
       const notifs = [];
 
-      gRes.data.forEach(g => {
+      gData.forEach(g => {
         notifs.push({
           id: `g-${g.gradeId}`,
           type: 'grade',
           studentId: g.studentId,
-          text: `Notë e re: ${g.subject} — ${g.gradeValue}`,
+          text: `Notë e re: ${g.subject} — Nota ${g.gradeValue}`,
           date: g.date,
         });
       });
 
-      aRes.data
+      aData
         .filter(a => a.status?.toLowerCase() === 'absent')
         .forEach(a => {
           notifs.push({
@@ -75,7 +89,7 @@ export default function ParentDashboard() {
           });
         });
 
-      cmRes.data.forEach(c => {
+      cmData.forEach(c => {
         notifs.push({
           id: `c-${c.commentId}`,
           type: 'comment',
@@ -85,9 +99,13 @@ export default function ParentDashboard() {
         });
       });
 
-      // Sort newest first
       notifs.sort((a, b) => new Date(b.date) - new Date(a.date));
       setNotifications(notifs);
+
+      // Simple warning if primary data (children list) failed but let logic continue
+      if (cData.length === 0 && children.length === 0) {
+        // Only warn if we've successfully logged in but see nothing
+      }
 
     } catch (e) {
       flash(setMsg, 'Gabim ngarkimi: ' + (e.response?.data || e.message), 'error');
@@ -140,10 +158,10 @@ export default function ParentDashboard() {
 
   /* ── grade color ─────────────────────────────────────── */
   const gradeColor = v => {
-    if (v >= 9) return '#059669';
-    if (v >= 7) return '#2563eb';
-    if (v >= 5) return '#d97706';
-    return '#dc2626';
+    if (v === 5) return '#059669'; // Excellent
+    if (v === 4) return '#2563eb'; // Good
+    if (v === 3) return '#d97706'; // Satisfactory
+    return '#dc2626'; // Needs improvement/Fail
   };
 
   if (loading) return (

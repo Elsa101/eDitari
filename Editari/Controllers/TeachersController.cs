@@ -110,6 +110,15 @@ namespace Editari.Controllers
             var teacher = await _context.Teachers.FindAsync(id);
             if (teacher == null) return NotFound();
 
+            // 1. Remove related RefreshTokens directly
+            await _context.RefreshTokens.Where(rt => rt.TeacherId == id).ExecuteDeleteAsync();
+
+            // 2. Remove related Subjects directly
+            await _context.Subjects.Where(s => s.TeacherId == id).ExecuteDeleteAsync();
+
+            // 3. Remove related Comments directly
+            await _context.Comments.Where(c => c.TeacherId == id).ExecuteDeleteAsync();
+
             _context.Teachers.Remove(teacher);
             await _context.SaveChangesAsync();
 

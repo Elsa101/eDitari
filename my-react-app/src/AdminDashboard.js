@@ -93,16 +93,38 @@ export default function AdminDashboard() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [sRes, stRes, pRes] = await Promise.all([
-        api.get('/Students/with-parents'),
-        api.get('/Staff'),
-        api.get('/Parents'),
+      const fetchSafe = async (url, setter) => {
+        try {
+          const res = await api.get(url);
+          setter(res.data);
+          return res.data;
+        } catch (err) {
+          console.error(`Failed to fetch ${url}:`, err);
+          return [];
+        }
+      };
+
+      const [sData, stRaw, tRaw, pData] = await Promise.all([
+        fetchSafe('/Students/with-parents', setStudentsRich),
+        fetchSafe('/Staff', () => {}),
+        fetchSafe('/Teachers', () => {}),
+        fetchSafe('/Parents', setParents),
       ]);
-      setStudentsRich(sRes.data);
-      setStaff(stRes.data);
-      setParents(pRes.data);
+
+      // Combine Staff (from API/Staff) and Teachers (from API/Teachers)
+      const combinedStaff = [
+        ...stRaw.map(s => ({ ...s, id: s.staffId, type: 'staff' })),
+        ...tRaw.map(t => ({ 
+          ...t, 
+          id: t.teacherId, 
+          type: 'teacher', 
+          role: 'Teacher', 
+          name: `${t.name} ${t.surname}`.trim() 
+        }))
+      ];
+      setStaff(combinedStaff);
     } catch (e) {
-      flash(setMsg, 'Gabim ngarkimi: ' + (e.response?.data || e.message), 'error');
+      flash(setMsg, 'Gabim gjatë sinkronizimit: ' + (e.response?.data || e.message), 'error');
     } finally {
       setLoading(false);
     }
@@ -112,9 +134,18 @@ export default function AdminDashboard() {
 
   /* ── teacher click ──────────────────── */
   const handleTeacher = t => {
-    if (selectedTeacher?.staffId === t.staffId) { setSelectedTeacher(null); setTeacherStudents([]); return; }
+    if (selectedTeacher?.id === t.id && selectedTeacher?.type === t.type) { 
+      setSelectedTeacher(null); 
+      setTeacherStudents([]); 
+      return; 
+    }
     setSelectedTeacher(t);
-    setTeacherStudents(t.classId ? studentsRich.filter(s => s.classId === t.classId) : []);
+    // Filter by BOTH TeacherId (direct ownership) and ClassId (legacy assignment)
+    const filtered = studentsRich.filter(s => 
+      String(s.teacherId) === String(t.id) || 
+      (t.classId && String(s.classId) === String(t.classId))
+    );
+    setTeacherStudents(filtered);
   };
 
   /* ── deletes ────────────────────────── */
@@ -123,9 +154,18 @@ export default function AdminDashboard() {
     try { await api.delete(`/Students/${id}`); setStudentsRich(p => p.filter(s => s.studentId !== id)); setTeacherStudents(p => p.filter(s => s.studentId !== id)); flash(setMsg, 'Nxënësi u fshi.'); }
     catch (e) { flash(setMsg, e.response?.data || e.message, 'error'); }
   };
-  const delStaff = async id => {
+  const delStaff = async (id, type) => {
     if (!window.confirm('Fshi mësuesin?')) return;
-    try { await api.delete(`/Staff/${id}`); setStaff(p => p.filter(s => s.staffId !== id)); if (selectedTeacher?.staffId === id) { setSelectedTeacher(null); setTeacherStudents([]); } flash(setMsg, 'Mësuesi u fshi.'); }
+    const endpoint = type === 'teacher' ? `/Teachers/${id}` : `/Staff/${id}`;
+    try { 
+      await api.delete(endpoint); 
+      setStaff(p => p.filter(s => !(s.id === id && s.type === type))); 
+      if (selectedTeacher?.id === id && selectedTeacher?.type === type) { 
+        setSelectedTeacher(null); 
+        setTeacherStudents([]); 
+      } 
+      flash(setMsg, 'Mësuesi u fshi.'); 
+    }
     catch (e) { flash(setMsg, e.response?.data || e.message, 'error'); }
   };
   const delParent = async id => {
@@ -146,6 +186,7 @@ export default function AdminDashboard() {
         email: studentForm.email, phone: studentForm.phone,
         address: studentForm.address,
         classId: null,
+        teacherId: studentForm.staffId ? parseInt(studentForm.staffId) : null,
         parentId: studentForm.parentId ? parseInt(studentForm.parentId) : null,
       });
       const ns = createRes.data;
@@ -268,8 +309,8 @@ export default function AdminDashboard() {
                   />
                   <SearchDrop
                     label="Mësuesi (opsionale)"
-                    items={staff}
-                    valueKey="staffId"
+                    items={staff.filter(s => s.type === 'staff')}
+                    valueKey="id"
                     displayFn={s=>`${s.name} (${s.role})`}
                     value={studentForm.staffId}
                     onChange={v=>setStudentForm(x=>({...x,staffId:v}))}
@@ -294,8 +335,8 @@ export default function AdminDashboard() {
                   </div>
                   <SearchDrop
                     label="Mësuesi (opsionale)"
-                    items={staff}
-                    valueKey="staffId"
+                    items={staff.filter(s => s.type === 'staff')}
+                    valueKey="id"
                     displayFn={s=>`${s.name} (${s.role})`}
                     value={assignStaffId}
                     onChange={setAssignStaffId}
@@ -366,7 +407,10 @@ export default function AdminDashboard() {
                         <td><strong className="clickable" onClick={()=>setDetailStudent(s)}>{s.name}</strong></td>
                         <td>{s.surname}</td>
                         <td>{s.classId?<span className="badge-class">#{s.classId}</span>:'—'}</td>
-                        <td className="muted small">{staffName(s.classId)}</td>
+                        <td className="muted small">
+                          <div style={{fontWeight: '600', color: 'var(--primary)'}}>{s.teacherName || '—'}</div>
+                          <div style={{fontSize: '0.75rem'}}>{staffName(s.classId)}</div>
+                        </td>
                         <td>
                           {s.parents?.length>0 ? s.parents.map(p=>(
                             <span key={p.parentId} className="parent-tag">{p.name} {p.surname}</span>
@@ -426,14 +470,14 @@ export default function AdminDashboard() {
             <div className="teachers-layout">
               <div className="teacher-list-col">
                 {staff.map(t=>(
-                  <div key={t.staffId} className={`teacher-card ${selectedTeacher?.staffId===t.staffId?'selected':''}`} onClick={()=>handleTeacher(t)}>
+                  <div key={`${t.type}-${t.id}`} className={`teacher-card ${selectedTeacher?.id===t.id && selectedTeacher?.type===t.type?'selected':''}`} onClick={()=>handleTeacher(t)}>
                     <div className="teacher-avatar">{t.name?.[0]?.toUpperCase()}</div>
                     <div className="teacher-info-text">
                       <span className="teacher-name">{t.name}</span>
                       <span className="teacher-role">{t.role}</span>
                       {t.classId&&<span className="badge-class mini">Klasa #{t.classId}</span>}
                     </div>
-                    <button className="btn-sm btn-delete" onClick={e=>{e.stopPropagation();delStaff(t.staffId);}}>🗑</button>
+                    <button className="btn-sm btn-delete" onClick={e=>{e.stopPropagation();delStaff(t.id, t.type);}}>🗑</button>
                   </div>
                 ))}
               </div>

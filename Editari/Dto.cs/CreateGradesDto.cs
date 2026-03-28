@@ -14,7 +14,7 @@ namespace eDitari.Dtos
 
         [Required(ErrorMessage = "Vlera e notës është e detyrueshme.")]
         [Range(0, 100, ErrorMessage = "Nota duhet të jetë nga 1 deri në 5.")]
-        public required decimal GradeValue { get; set; }
+        public required int GradeValue { get; set; }
 
         [Required(ErrorMessage = "Data është e detyrueshme.")]
         [DataType(DataType.Date, ErrorMessage = "Formati i datës nuk është i vlefshëm.")]
