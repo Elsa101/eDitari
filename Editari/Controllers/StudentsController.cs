@@ -160,7 +160,7 @@ namespace Editari.Controllers
             {
                 // Fshirja brute-force e të gjitha të dhënave të ndërlidhura me StudentId
                 await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Grades WHERE StudentId = {id}");
-                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Attendance] WHERE StudentId = {id}");
+                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Attendances] WHERE StudentId = {id}");
                 await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Comments WHERE StudentId = {id}");
                 await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM StudentParent WHERE StudentId = {id}");
                 await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Students WHERE StudentId = {id}");
