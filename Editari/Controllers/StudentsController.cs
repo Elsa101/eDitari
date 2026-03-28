@@ -52,7 +52,7 @@ namespace Editari.Controllers
                 return await _context.Students.ToListAsync();
             }
 
-            if (userRole == "Staff" && !string.IsNullOrEmpty(userIdStr))
+            if ((userRole == "Staff" || userRole == "Teacher") && !string.IsNullOrEmpty(userIdStr))
             {
                 var staffId = int.Parse(userIdStr);
                 var staff = await _context.Staff.FindAsync(staffId);

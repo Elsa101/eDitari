@@ -78,7 +78,7 @@ export default function AdminDashboard() {
   const [studentForm,    setStudentForm]    = useState(emptyForm);
 
   const [showAddTeacher, setShowAddTeacher] = useState(false);
-  const [teacherForm,    setTeacherForm]    = useState({name: '', username: '', password: '', role: 'Staff'});
+  const [teacherForm,    setTeacherForm]    = useState({name: '', username: '', password: '', role: 'Teacher'});
 
   const [detailStudent, setDetailStudent] = useState(null); // modal for student details
 
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
       await api.post('/Staff/register', teacherForm);
       flash(setMsg, `✅ Mësuesi ${teacherForm.name} u shtua me sukses!`);
       setShowAddTeacher(false);
-      setTeacherForm({name: '', username: '', password: '', role: 'Staff'});
+      setTeacherForm({name: '', username: '', password: '', role: 'Teacher'});
       fetchAll();
     } catch (e) { flash(setMsg, e.response?.data || e.message, 'error'); }
   };
@@ -413,7 +413,7 @@ export default function AdminDashboard() {
                   <div className="form-field">
                     <label>Roli</label>
                     <select name="role" value={teacherForm.role} onChange={handleTeacherChange} className="premium-input-field" style={{padding: '0.6rem 1rem', border: '1px solid #e2e8f0', borderRadius:'10px'}}>
-                      <option value="Staff">Mësues (Staff)</option>
+                      <option value="Teacher">Mësues (Teacher)</option>
                     </select>
                   </div>
                 </div>
