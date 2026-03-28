@@ -6,7 +6,7 @@ import './ParentDashboard.css';
 const NOTIF_TYPES = {
   grade:      { icon: '📝', label: 'Notë e re',    color: '#4f46e5', bg: '#eef2ff' },
   attendance: { icon: '📅', label: 'Mungesë',       color: '#dc2626', bg: '#fee2e2' },
-  comment:    { icon: '💬', label: 'Mesazh',        color: '#059669', bg: '#d1fae5' },
+  comment:    { icon: '💬', label: 'Koment',        color: '#059669', bg: '#d1fae5' },
 };
 
 /* ─────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ export default function ParentDashboard() {
           id: `c-${c.commentId}`,
           type: 'comment',
           studentId: c.studentId,
-          text: `Mesazh nga mësuesi: "${c.commentText?.slice(0, 60)}${c.commentText?.length > 60 ? '...' : ''}"`,
+          text: `Koment nga mësuesi: "${c.commentText?.slice(0, 60)}${c.commentText?.length > 60 ? '...' : ''}"`,
           date: c.date,
         });
       });
@@ -200,13 +200,13 @@ export default function ParentDashboard() {
       <div className="pd-header">
         <div className="pd-header-text">
           <h1>👨‍👩‍👧 Paneli i Prindit</h1>
-          <p>Kontrolloni notat, mungesat dhe mesazhet e fëmijëve tuaj.</p>
+          <p>Kontrolloni notat, mungesat dhe komentet e fëmijëve tuaj.</p>
         </div>
         <div className="pd-stat-row">
           <div className="pd-stat"><span>{children.length}</span>Fëmijë</div>
           <div className="pd-stat"><span>{grades.length}</span>Nota</div>
           <div className="pd-stat"><span>{attendance.filter(a=>a.status?.toLowerCase()==='absent').length}</span>Mungesa</div>
-          <div className="pd-stat"><span>{comments.length}</span>Mesazhe</div>
+          <div className="pd-stat"><span>{comments.length}</span>Komente</div>
         </div>
       </div>
 
@@ -248,7 +248,7 @@ export default function ParentDashboard() {
 
           {/* ── TABS ── */}
           <div className="tab-bar">
-            {[['grades','📝 Notat'],['attendance','📅 Prezenca'],['comments','💬 Mesazhe']].map(([k,l])=>(
+            {[['grades','📝 Notat'],['attendance','📅 Prezenca'],['comments','💬 Komente']].map(([k,l])=>(
               <button key={k} className={`tab-btn ${activeTab===k?'active':''}`} onClick={()=>setActiveTab(k)}>{l}</button>
             ))}
           </div>
@@ -303,8 +303,8 @@ export default function ParentDashboard() {
           {/* COMMENTS */}
           {activeTab==='comments' && (
             <div className="pd-card">
-              <h3>💬 Mesazhet nga Mësuesi</h3>
-              {cComments.length===0 ? <Empty text="Nuk ka mesazhe." /> : (
+              <h3>💬 Komentet nga Mësuesi</h3>
+              {cComments.length===0 ? <Empty text="Nuk ka komente." /> : (
                 <div className="comment-list">
                   {cComments.map(c=>(
                     <div key={c.commentId} className="comment-card">

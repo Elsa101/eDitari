@@ -52,7 +52,7 @@ namespace Editari.Models
         public DateTime Date { get; set; }
     }
  
-    [Table("Attendances")]
+    [Table("Attendance")]
     public class Attendance
     {
         public int AttendanceId { get; set; }

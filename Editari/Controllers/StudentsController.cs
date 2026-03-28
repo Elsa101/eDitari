@@ -11,7 +11,7 @@ namespace Editari.Controllers
     [ApiController]
     [Route("api/[controller]")]
 
-    [Authorize(Roles = "Admin,Teacher,Staff")]
+    [Authorize]
     public class StudentsController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -103,6 +103,7 @@ namespace Editari.Controllers
             return student;
         }
 
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         [HttpPost]
         public async Task<ActionResult<Student>> Post(StudentCreateDto dto)
         {
@@ -135,6 +136,7 @@ namespace Editari.Controllers
             return CreatedAtAction(nameof(Get), new { id = student.StudentId }, student);
         }
 
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Student student)
         {
@@ -150,14 +152,26 @@ namespace Editari.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var student = await _context.Students.FindAsync(id);
-            if (student == null) return NotFound();
-            _context.Students.Remove(student);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            try
+            {
+                // Fshirja brute-force e të gjitha të dhënave të ndërlidhura me StudentId
+                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Grades WHERE StudentId = {id}");
+                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Attendance] WHERE StudentId = {id}");
+                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Comments WHERE StudentId = {id}");
+                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM StudentParent WHERE StudentId = {id}");
+                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Students WHERE StudentId = {id}");
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Në rast se ka ndonjë gabim, kthejmë mesazhin për debug
+                return StatusCode(500, $"Gabim në SQL: {ex.Message}");
+            }
         }
         public class AssignClassDto
         {
@@ -166,7 +180,7 @@ namespace Editari.Controllers
             public int? StaffId { get; set; } // Opcionale: ID e mësuesit për t'u lidhur me këtë klasë
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Teacher,Staff")]
         [HttpPost("assign-class")]
         public async Task<IActionResult> AssignClass([FromBody] AssignClassDto dto)
         {

@@ -9,7 +9,7 @@ namespace Editari.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Admin,Teacher,Staff")]
     public class AttendancesController : ControllerBase
     {
         private readonly AppDbContext _context;
