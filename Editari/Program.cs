@@ -75,6 +75,18 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// ── Cleanup: ensure admins are never linked to classes ──
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var adminsWithClass = db.Staff.Where(s => s.Role == "Admin" && s.ClassId != null).ToList();
+    foreach (var admin in adminsWithClass)
+    {
+        admin.ClassId = null;
+    }
+    if (adminsWithClass.Count > 0) db.SaveChanges();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

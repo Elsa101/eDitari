@@ -23,7 +23,10 @@ namespace Editari.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Staff>>> GetAll()
         {
-            return await _context.Staff.ToListAsync();
+            // Exclude admins — they are system owners, not teachers
+            return await _context.Staff
+                .Where(s => s.Role != "Admin")
+                .ToListAsync();
         }
 
         [HttpGet("{id}")]

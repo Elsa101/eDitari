@@ -211,6 +211,10 @@ namespace Editari.Controllers
                 var staff = await _context.Staff.FindAsync(dto.StaffId.Value);
                 if (staff != null)
                 {
+                    // Admins should never be linked to classes
+                    if (staff.Role == "Admin")
+                        return BadRequest("Adminët nuk mund të lidhen me klasa.");
+
                     staff.ClassId = schoolClass.ClassId;
                     _context.Entry(staff).State = EntityState.Modified;
                 }
