@@ -406,7 +406,7 @@ export default function AdminDashboard() {
                         <td className="id-cell">{s.studentId}</td>
                         <td><strong className="clickable" onClick={()=>setDetailStudent(s)}>{s.name}</strong></td>
                         <td>{s.surname}</td>
-                        <td>{s.classId?<span className="badge-class">#{s.classId}</span>:'—'}</td>
+                        <td>{s.className ? <span className="badge-class">{s.className}</span> : '—'}</td>
                         <td className="muted small">
                           <div style={{fontWeight: '600', color: 'var(--primary)'}}>{s.teacherName || '—'}</div>
                           <div style={{fontSize: '0.75rem'}}>{staffName(s.classId)}</div>

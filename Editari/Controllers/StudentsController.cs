@@ -91,6 +91,10 @@ namespace Editari.Controllers
                                     .Select(t => t.Name + " " + t.Surname)
                                     .FirstOrDefault()
                                  ?? "—",
+                    ClassName = _context.SchoolClasses
+                                    .Where(c => c.ClassId == s.ClassId)
+                                    .Select(c => c.ClassName)
+                                    .FirstOrDefault() ?? "—",
                     s.LinkCode,
                     Parents = _context.StudentParents
                         .Where(sp => sp.StudentId == s.StudentId)
