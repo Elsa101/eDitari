@@ -6,13 +6,11 @@ import { motion } from 'framer-motion';
 
 const Register = () => {
   const navigate = useNavigate();
-  const [role, setRole] = useState('Parent'); // Default role
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
     email: '',
     phone: '',
-    username: '', // Për Staff
     password: '',
   });
   const [error, setError] = useState('');
@@ -25,34 +23,14 @@ const Register = () => {
     setLoading(true);
 
     try {
-      if (role === 'Parent') {
-        const parentData = {
-          name: formData.name,
-          surname: formData.surname,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password
-        };
-        await api.post('/Parents/register', parentData);
-      } else if (role === 'Teacher') {
-        const teacherData = {
-          name: formData.name,
-          surname: formData.surname,
-          email: formData.email,
-          phone: formData.phone,
-          username: formData.username,
-          password: formData.password
-        };
-        await api.post('/Teachers/register', teacherData);
-      } else {
-        const staffData = {
-          name: formData.name,
-          username: formData.username,
-          password: formData.password,
-          role: role // Admin
-        };
-        await api.post('/Staff/register', staffData);
-      }
+      const parentData = {
+        name: formData.name,
+        surname: formData.surname,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password
+      };
+      await api.post('/Parents/register', parentData);
       
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
@@ -99,8 +77,8 @@ const Register = () => {
           <div style={{ background: 'var(--primary)', color: 'white', width: '3rem', height: '3rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
             <UserPlus size={28} />
           </div>
-          <h2 style={{ fontSize: '1.875rem', marginBottom: '0.5rem' }}>Krijo Llogari</h2>
-          <p style={{ color: 'var(--secondary)' }}>Zgjidhni rolin tuaj në sistemin eDitari</p>
+          <h2 style={{ fontSize: '1.875rem', marginBottom: '0.5rem' }}>Krijo Llogari Prindi</h2>
+          <p style={{ color: 'var(--secondary)' }}>Plotësoni të dhënat për t'u regjistruar në eDitari si Prind</p>
         </div>
 
         {error && (
@@ -114,36 +92,9 @@ const Register = () => {
           </motion.div>
         )}
 
-        <div className="form-group mb-6">
-          <label className="label">Zgjidh Rolin</label>
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-            {['Parent', 'Teacher', 'Admin'].map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRole(r)}
-                style={{
-                  flex: 1,
-                  padding: '0.6rem',
-                  borderRadius: '10px',
-                  border: '2px solid',
-                  borderColor: role === r ? 'var(--primary)' : '#f1f2f6',
-                  background: role === r ? 'rgba(79, 70, 229, 0.05)' : 'white',
-                  color: role === r ? 'var(--primary)' : 'var(--secondary)',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {r === 'Parent' ? 'Prind' : r === 'Teacher' ? 'Mësues' : 'Admin'}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="label">Emri i Plotë</label>
+            <label className="label">Emri</label>
             <div style={{ position: 'relative' }}>
               <User size={18} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />
               <input 
@@ -151,45 +102,33 @@ const Register = () => {
                 name="name" 
                 className="input" 
                 style={{ paddingLeft: '2.75rem' }}
-                placeholder="Emri dhe Mbiemri" 
+                placeholder="Emri" 
                 onChange={handleChange} 
                 required 
               />
             </div>
           </div>
 
-          {(role === 'Parent' || role === 'Teacher') && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <div className="form-group">
-                <label className="label">Mbiemri</label>
-                <input type="text" name="surname" className="input" placeholder="Mbiemri" onChange={handleChange} required />
-              </div>
-              <div className="form-group">
-                <label className="label">Email</label>
-                <div style={{ position: 'relative' }}>
-                  <Mail size={18} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />
-                  <input type="email" name="email" className="input" style={{ paddingLeft: '2.75rem' }} placeholder="shembull@email.com" onChange={handleChange} required />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="label">Telefoni</label>
-                <div style={{ position: 'relative' }}>
-                  <Phone size={18} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />
-                  <input type="text" name="phone" className="input" style={{ paddingLeft: '2.75rem' }} placeholder="+383 4X XXX XXX" onChange={handleChange} />
-                </div>
-              </div>
-            </motion.div>
-          )}
+          <div className="form-group">
+            <label className="label">Mbiemri</label>
+            <input type="text" name="surname" className="input" placeholder="Mbiemri" onChange={handleChange} required />
+          </div>
 
-          {role !== 'Parent' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="form-group">
-              <label className="label">Emri i Përdoruesit (Username)</label>
-              <div style={{ position: 'relative' }}>
-                <User size={18} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />
-                <input type="text" name="username" className="input" style={{ paddingLeft: '2.75rem' }} placeholder="përdoruesi123" onChange={handleChange} required />
-              </div>
-            </motion.div>
-          )}
+          <div className="form-group">
+            <label className="label">Email</label>
+            <div style={{ position: 'relative' }}>
+              <Mail size={18} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />
+              <input type="email" name="email" className="input" style={{ paddingLeft: '2.75rem' }} placeholder="shembull@email.com" onChange={handleChange} required />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="label">Telefoni</label>
+            <div style={{ position: 'relative' }}>
+              <Phone size={18} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--secondary)' }} />
+              <input type="text" name="phone" className="input" style={{ paddingLeft: '2.75rem' }} placeholder="+383 4X XXX XXX" onChange={handleChange} />
+            </div>
+          </div>
 
           <div className="form-group">
             <label className="label">Fjalëkalimi</label>

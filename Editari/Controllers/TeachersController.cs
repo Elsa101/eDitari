@@ -50,7 +50,7 @@ namespace Editari.Controllers
         }
 
         // ---------------- REGISTER ----------------
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] eDitari.Dtos.CreateTeacherDTO dto)
         {
