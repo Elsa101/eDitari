@@ -101,8 +101,37 @@ namespace Editari.Controllers
 
                 if (parent != null && BCrypt.Net.BCrypt.Verify(dto.Password, parent.PasswordHash))
                 {
-                    var token = CreateJwtToken(parent.ParentId, parent.Email, "Parent");
+                    // Check if parent has any children linked
+                    var hasChildren = await _context.StudentParents.AnyAsync(sp => sp.ParentId == parent.ParentId);
+                    
+                    // IF parent already has children, ensure they are ACTIVE and let them login
+                    if (hasChildren)
+                    {
+                        if (!parent.IsActive) 
+                        {
+                            parent.IsActive = true; 
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+                    else 
+                    {
+                        // NO children linked: check age
+                        var accountAgeDays = (DateTime.UtcNow - parent.CreatedAt).TotalDays;
+                        if (accountAgeDays > 14)
+                        {
+                            parent.IsActive = false;
+                            await _context.SaveChangesAsync();
+                            return Unauthorized("Llogaria juaj është deaktivizuar sepse nuk keni lidhur asnjë fëmijë brenda 14 ditëve nga regjistrimi.");
+                        }
+                        
+                        // Age is < 14, but still check if they were manually disabled
+                        if (!parent.IsActive)
+                        {
+                             return Unauthorized("Llogaria juaj është deaktivizuar.");
+                        }
+                    }
 
+                    var token = CreateJwtToken(parent.ParentId, parent.Email, "Parent");
                     var parentRefreshToken = Guid.NewGuid().ToString();
                     var parentRtEntity = new RefreshToken
                     {

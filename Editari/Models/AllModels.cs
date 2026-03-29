@@ -31,7 +31,9 @@ namespace Editari.Models
         public string Phone { get; set; } = string.Empty;
  
         public string PasswordHash { get; set; } = string.Empty;
- 
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         public ICollection<StudentParent> StudentParents { get; set; } = new List<StudentParent>();
     }
  
