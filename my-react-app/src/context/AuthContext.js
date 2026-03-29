@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../api/axios';
+import api, { setLogoutCallback } from '../api/axios';
+import { setAuthTokens, clearAuthTokens, getAccessToken } from '../api/tokenStorage';
 
 const AuthContext = createContext(null);
 
@@ -7,13 +8,46 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    const userType = localStorage.getItem('userType');
+  // Define logout first to pass to api interceptor
+  const logout = async () => {
+    // Optional: notify backend to revoke the token
+    // const refreshToken = getRefreshToken();
+    // if (refreshToken) {
+    //   try { await api.post('/Auth/revoke', { refreshToken }); } catch (err) {}
+    // }
+    
+    clearAuthTokens();
+    localStorage.removeItem('role');
+    localStorage.removeItem('userType');
+    // Note: tokens were never in localStorage according to new requirement
+    
+    setUser(null);
+    window.location.href = '/login';
+  };
 
-    if (token) {
-      setUser({ role, userType });
+  useEffect(() => {
+    // Register the logout callback for axios interceptor
+    setLogoutCallback(logout);
+
+    // Bootstrap local state
+    // Note: Access token cannot be recovered from memory after refresh
+    // So if user refreshes the page, they are logged out.
+    // This is the literal security requirement: Neve stored in localStorage.
+    const hasRole = localStorage.getItem('role');
+    if (hasRole) {
+      // Warning: User is logged in but has no tokens until they login again
+      // We could ideally use http-only cookies for persistence, but here we follow memory-only rules.
+      // So if getAccessToken is null, user must login.
+      if (!getAccessToken()) {
+        localStorage.removeItem('role');
+        localStorage.removeItem('userType');
+        setUser(null);
+      } else {
+        setUser({ 
+           role: localStorage.getItem('role'), 
+           userType: localStorage.getItem('userType') 
+        });
+      }
     }
     setLoading(false);
   }, []);
@@ -23,8 +57,10 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post('/Auth/login', { username, password });
       const { accessToken, refreshToken, role, userType } = response.data;
 
-      localStorage.setItem('token', accessToken);
-      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+      // Store in memory instead of localStorage
+      setAuthTokens(accessToken, refreshToken);
+      
+      // We can store non-sensitive data in localStorage for UI
       localStorage.setItem('role', role);
       localStorage.setItem('userType', userType);
 
@@ -35,19 +71,6 @@ export const AuthProvider = ({ children }) => {
       const message = typeof data === 'string' ? data : data?.message || data?.error || 'Gabim gjatë identifikimit';
       return { success: false, message };
     }
-  };
-
-  const logout = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken) {
-      try {
-        await api.post('/Auth/logout', { refreshToken });
-      } catch (err) {
-        console.error('Logout error:', err);
-      }
-    }
-    localStorage.clear();
-    setUser(null);
   };
 
   return (
