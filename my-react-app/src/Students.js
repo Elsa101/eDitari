@@ -102,11 +102,14 @@ function Students() {
     const presentCount = studentAtt.filter(a => a.status === 'Present').length;
     const absentCount = studentAtt.filter(a => a.status === 'Absent').length;
 
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayAtt = studentAtt.find(a => a.date.split('T')[0] === todayStr);
+
     const recentCom = comments
       .filter(c => c.studentId === studentId)
       .sort((a, b) => new Date(b.date) - new Date(a.date))[0]?.commentText || "Mungon";
 
-    return { avg, latest, allGrades: studentGrades, allAttendance: studentAtt, presentCount, absentCount, recentCom };
+    return { avg, latest, allGrades: studentGrades, allAttendance: studentAtt, presentCount, absentCount, todayStatus: todayAtt?.status, recentCom };
   };
 
   const handleAction = (type, student) => {
@@ -417,13 +420,27 @@ function Students() {
                       </div>
                     </td>
                     <td>
-                      <div className="att-summary-vertical">
-                        <div className="att-count present" onClick={() => handleAction('view-attendance', s)}>
-                          <Check size={12} /> {stats.presentCount} Prezent
-                        </div>
-                        <div className="att-count absent" onClick={() => handleAction('view-attendance', s)}>
-                          <X size={12} /> {stats.absentCount} Mungon
-                        </div>
+                      <div className="att-column-integrated">
+                        {markingAttendanceFor === s.studentId ? (
+                          <div className="attendance-selector-inline">
+                            <button className="action-circle at-present" title="Prezent" onClick={() => markAttendance(s.studentId, 'Present')}>
+                              <Check size={16} />
+                            </button>
+                            <button className="action-circle at-absent" title="Mungon" onClick={() => markAttendance(s.studentId, 'Absent')}>
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ) : stats.todayStatus ? (
+                          <div className={`status-badge-today-mini ${stats.todayStatus.toLowerCase()}`} title="Statusi për sot (Klikoni për historinë)" onClick={() => handleAction('view-attendance', s)}>
+                             {stats.todayStatus === 'Present' ? <Check size={14} /> : <X size={14} />}
+                             <span>{stats.todayStatus === 'Present' ? 'Prezent' : 'Mungon'}</span>
+                          </div>
+                        ) : (
+                          <div className="att-marking-placeholder" onClick={() => setMarkingAttendanceFor(s.studentId)}>
+                             <ClipboardCheck size={16} />
+                             <span>Shëno</span>
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td>
@@ -437,25 +454,6 @@ function Students() {
                         <button className="action-circle gr" title="Shto Notë" onClick={() => handleAction('grade', s)}>
                           <BookOpen size={16} />
                         </button>
-                        
-                        {markingAttendanceFor === s.studentId ? (
-                          <div className="attendance-selector-inline">
-                            <button className="action-circle at-present" title="Prezent" onClick={() => markAttendance(s.studentId, 'Present')}>
-                              <Check size={16} />
-                            </button>
-                            <button className="action-circle at-absent" title="Mungon" onClick={() => markAttendance(s.studentId, 'Absent')}>
-                              <X size={16} />
-                            </button>
-                          </div>
-                        ) : (
-                          <button 
-                            className="action-circle at" 
-                            title="Shëno Pjesëmarrjen" 
-                            onClick={() => setMarkingAttendanceFor(s.studentId)}
-                          >
-                            <ClipboardCheck size={16} />
-                          </button>
-                        )}
 
                         <button className="action-circle cm" title="Shto Koment" onClick={() => handleAction('comment', s)}>
                            <MessageSquare size={16} />
