@@ -82,8 +82,14 @@ namespace Editari.Controllers
                     s.Address,
                     s.ClassId,
                     s.TeacherId,
-                    TeacherName = _context.Staff.Where(st => st.StaffId == s.TeacherId).Select(st => st.Name).FirstOrDefault()
-                                 ?? _context.Teachers.Where(t => t.TeacherId == s.TeacherId).Select(t => t.Name + " " + t.Surname).FirstOrDefault()
+                    TeacherName = _context.Staff
+                                    .Where(st => st.StaffId == s.TeacherId && st.Role != "Admin")
+                                    .Select(st => st.Name)
+                                    .FirstOrDefault()
+                                 ?? _context.Teachers
+                                    .Where(t => t.TeacherId == s.TeacherId)
+                                    .Select(t => t.Name + " " + t.Surname)
+                                    .FirstOrDefault()
                                  ?? "—",
                     s.LinkCode,
                     Parents = _context.StudentParents
@@ -107,14 +113,22 @@ namespace Editari.Controllers
         [HttpPost]
         public async Task<ActionResult<Student>> Post(StudentCreateDto dto)
         {
-            var userRole = User.FindFirstValue(ClaimTypes.Role);
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            bool isAdmin = User.IsInRole("Admin");
+            bool isTeacherOrStaff = User.IsInRole("Teacher") || User.IsInRole("Staff");
             int? teacherIdToAssign = dto.TeacherId;
 
             // Automation for Teachers/Staff: set themselves as the owner
-            if ((userRole == "Staff" || userRole == "Teacher") && !string.IsNullOrEmpty(userIdStr))
+            // ONLY if they are not an Admin. Admins MUST manually select a teacher.
+            if (isTeacherOrStaff && !isAdmin && !string.IsNullOrEmpty(userIdStr))
             {
                 teacherIdToAssign = int.Parse(userIdStr);
+            }
+            else if (isAdmin)
+            {
+                // If the user is an Admin, we ONLY use what's in the DTO.
+                // If the DTO doesn't have a teacher, it STAYS null.
+                teacherIdToAssign = dto.TeacherId;
             }
 
             var student = new Student
