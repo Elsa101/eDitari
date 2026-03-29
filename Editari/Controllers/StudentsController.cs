@@ -26,6 +26,7 @@ namespace Editari.Controllers
             public string Phone { get; set; } = string.Empty;
             public string Address { get; set; } = string.Empty;
             public int? ClassId { get; set; }
+            public string? ClassName { get; set; } // NEW: support direct class naming
             public int? ParentId { get; set; }
             public int? TeacherId { get; set; } // The responsible teacher
         }
@@ -135,6 +136,31 @@ namespace Editari.Controllers
                 teacherIdToAssign = dto.TeacherId;
             }
 
+            int? finalClassId = dto.ClassId;
+
+            // Handle the ClassName if provided
+            if (!string.IsNullOrWhiteSpace(dto.ClassName))
+            {
+                // Restricted classes: only 10, 11, 12
+                var allowedClasses = new[] { "10", "11", "12" };
+                var foundAllowed = allowedClasses.Any(ac => dto.ClassName.Contains(ac));
+                if (!foundAllowed)
+                {
+                    return BadRequest("Regjistrimi lejohet vetëm për klasat 10, 11 dhe 12.");
+                }
+
+                var schoolClass = await _context.SchoolClasses
+                    .FirstOrDefaultAsync(c => c.ClassName.ToLower() == dto.ClassName.ToLower());
+
+                if (schoolClass == null)
+                {
+                    schoolClass = new SchoolClass { ClassName = dto.ClassName };
+                    _context.SchoolClasses.Add(schoolClass);
+                    await _context.SaveChangesAsync();
+                }
+                finalClassId = schoolClass.ClassId;
+            }
+
             var student = new Student
             {
                 Name = dto.Name,
@@ -144,7 +170,7 @@ namespace Editari.Controllers
                 Phone = dto.Phone,
                 Address = dto.Address,
                 TeacherId = teacherIdToAssign,
-                ClassId = dto.ClassId,
+                ClassId = finalClassId,
                 LinkCode = Guid.NewGuid().ToString().ToUpper().Substring(0, 8)
             };
 
@@ -222,6 +248,14 @@ namespace Editari.Controllers
 
             if (schoolClass == null)
             {
+                // Restricted classes: only 10, 11, 12
+                var allowedClasses = new[] { "10", "11", "12" };
+                var foundAllowed = allowedClasses.Any(ac => dto.ClassName.Contains(ac));
+                if (!foundAllowed)
+                {
+                    return BadRequest("Regjistrimi lejohet vetëm për klasat 10, 11 dhe 12.");
+                }
+
                 schoolClass = new SchoolClass { ClassName = dto.ClassName };
                 _context.SchoolClasses.Add(schoolClass);
                 await _context.SaveChangesAsync();

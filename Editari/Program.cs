@@ -79,6 +79,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ── Cleanup: ensure admins are never linked to classes ──
+/*
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -89,6 +90,7 @@ using (var scope = app.Services.CreateScope())
     }
     if (adminsWithClass.Count > 0) db.SaveChanges();
 }
+*/
 
 if (app.Environment.IsDevelopment())
 {

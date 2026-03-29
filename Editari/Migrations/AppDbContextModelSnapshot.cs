@@ -82,8 +82,8 @@ namespace eDitari.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("GradeValue")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("GradeValue")
+                        .HasColumnType("int");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");

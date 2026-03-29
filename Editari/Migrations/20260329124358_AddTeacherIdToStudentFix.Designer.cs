@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace eDitari.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260328214438_AddTeacherIdToStudent")]
-    partial class AddTeacherIdToStudent
+    [Migration("20260329124358_AddTeacherIdToStudentFix")]
+    partial class AddTeacherIdToStudentFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -85,8 +85,8 @@ namespace eDitari.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("GradeValue")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("GradeValue")
+                        .HasColumnType("int");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");

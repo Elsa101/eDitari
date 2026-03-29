@@ -241,7 +241,7 @@ export default function ParentDashboard() {
             <input value={linkCode} onChange={e=>setLinkCode(e.target.value)} placeholder="p.sh. A1B2C3D4" required />
           </div>
           <button type="submit" className="btn-link" disabled={linking}>
-            {linking ? '⏳' : '🔗 Lidho'}
+            {linking ? '⏳' : '🔗 Lidhu'}
           </button>
         </form>
       </div>

@@ -180,28 +180,29 @@ export default function AdminDashboard() {
   const handleAddStudent = async e => {
     e.preventDefault();
     try {
-      const createRes = await api.post('/Students', {
-        name: studentForm.name, surname: studentForm.surname,
+      const createPayload = {
+        name: studentForm.name, 
+        surname: studentForm.surname,
         dateOfBirth: studentForm.dateOfBirth || '2000-01-01',
-        email: studentForm.email, phone: studentForm.phone,
+        email: studentForm.email, 
+        phone: studentForm.phone,
         address: studentForm.address,
-        classId: null,
+        className: studentForm.className.trim(), // Send className directly
         teacherId: studentForm.staffId ? parseInt(studentForm.staffId) : null,
         parentId: studentForm.parentId ? parseInt(studentForm.parentId) : null,
-      });
+      };
+
+      const createRes = await api.post('/Students', createPayload);
       const ns = createRes.data;
-      if (studentForm.className.trim()) {
-        await api.post('/Students/assign-class', {
-          studentId: ns.studentId,
-          className: studentForm.className.trim(),
-          staffId: studentForm.staffId ? parseInt(studentForm.staffId) : null,
-        });
-      }
+
       flash(setMsg, `✅ ${ns.name} ${ns.surname} u shtua! ID:${ns.studentId} | Kodi:${ns.linkCode}`);
       setShowAddStudent(false);
       setStudentForm(emptyForm);
       fetchAll();
-    } catch (e) { flash(setMsg, e.response?.data || e.message, 'error'); }
+    } catch (e) { 
+      const errorMsg = e.response?.data?.message || e.response?.data || e.message;
+      flash(setMsg, typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg, 'error'); 
+    }
   };
 
   /* ── add teacher ────────────────────── */

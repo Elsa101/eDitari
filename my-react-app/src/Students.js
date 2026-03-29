@@ -193,15 +193,12 @@ function Students() {
           savedStudent = payload;
         } else {
           const { studentId, ...createPayload } = payload;
+          // IMPORTANT: Pass className directly to satisfy backend validation
+          if (formData.className && formData.className.trim()) {
+            createPayload.className = formData.className.trim();
+          }
           const res = await api.post('/Students', createPayload);
           savedStudent = res.data;
-        }
-
-        if (formData.className && formData.className.trim()) {
-          await api.post('/Students/assign-class', {
-            studentId: savedStudent.studentId,
-            className: formData.className.trim()
-          });
         }
         alert("Nxënësi u ruajt me sukses!");
       }
