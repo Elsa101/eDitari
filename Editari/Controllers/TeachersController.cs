@@ -119,8 +119,12 @@ namespace Editari.Controllers
             // 3. Remove related Comments directly
             await _context.Comments.Where(c => c.TeacherId == id).ExecuteDeleteAsync();
 
-            _context.Teachers.Remove(teacher);
-            await _context.SaveChangesAsync();
+            // 4. Detach students associated with this teacher
+            await _context.Students.Where(s => s.TeacherId == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.TeacherId, (int?)null));
+
+            // 5. Remove the Teacher directly
+            await _context.Teachers.Where(t => t.TeacherId == id).ExecuteDeleteAsync();
 
             return NoContent();
         }

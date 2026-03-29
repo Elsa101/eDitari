@@ -213,19 +213,19 @@ namespace Editari.Controllers
         {
             try
             {
-                // Fshirja brute-force e të gjitha të dhënave të ndërlidhura me StudentId
-                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Grades WHERE StudentId = {id}");
-                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Attendances] WHERE StudentId = {id}");
-                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Comments WHERE StudentId = {id}");
-                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM StudentParent WHERE StudentId = {id}");
-                await _context.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Students WHERE StudentId = {id}");
+                // Fshirja e sigurt përmes EF Core ExecuteDeleteAsync
+                await _context.Grades.Where(g => g.StudentId == id).ExecuteDeleteAsync();
+                await _context.Attendances.Where(a => a.StudentId == id).ExecuteDeleteAsync();
+                await _context.Comments.Where(c => c.StudentId == id).ExecuteDeleteAsync();
+                await _context.StudentParents.Where(sp => sp.StudentId == id).ExecuteDeleteAsync();
+                await _context.Students.Where(s => s.StudentId == id).ExecuteDeleteAsync();
 
                 return NoContent();
             }
             catch (Exception ex)
             {
                 // Në rast se ka ndonjë gabim, kthejmë mesazhin për debug
-                return StatusCode(500, $"Gabim në SQL: {ex.Message}");
+                return StatusCode(500, $"Gabim gjatë fshirjes: {ex.Message}");
             }
         }
         public class AssignClassDto

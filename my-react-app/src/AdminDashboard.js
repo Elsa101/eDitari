@@ -87,7 +87,9 @@ export default function AdminDashboard() {
   const [assignStaffId, setAssignStaffId] = useState('');
 
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [msg,     setMsg]     = useState({ text: '', type: '' });
+  const [formErr, setFormErr] = useState('');
 
   /* ── fetch ──────────────────────────── */
   const fetchAll = useCallback(async () => {
@@ -179,6 +181,8 @@ export default function AdminDashboard() {
 
   const handleAddStudent = async e => {
     e.preventDefault();
+    setSubmitting(true);
+    setFormErr('');
     try {
       const createPayload = {
         name: studentForm.name, 
@@ -200,8 +204,18 @@ export default function AdminDashboard() {
       setStudentForm(emptyForm);
       fetchAll();
     } catch (e) { 
-      const errorMsg = e.response?.data?.message || e.response?.data || e.message;
-      flash(setMsg, typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg, 'error'); 
+      let errorMsg = e.response?.data?.message || e.response?.data || e.message;
+      
+      // Handle ASP.NET Core Validation Errors (nested errors object)
+      if (e.response?.data?.errors) {
+        const errs = e.response.data.errors;
+        errorMsg = Object.keys(errs).map(k => `${k}: ${errs[k].join(', ')}`).join(' | ');
+      }
+
+      setFormErr(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+      flash(setMsg, 'Gabim gjatë regjistrimit. Kontrolloni formën.', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -318,7 +332,10 @@ export default function AdminDashboard() {
                     placeholder="Kërko mësues..."
                   />
                 </div>
-                <button type="submit" className="btn-primary" style={{alignSelf:'flex-start'}}>✅ Regjistro</button>
+                {formErr && <div className="form-error-msg">⚠️ {formErr}</div>}
+                <button type="submit" className="btn-primary" style={{alignSelf:'flex-start'}} disabled={submitting}>
+                  {submitting ? 'Duke u regjistruar...' : '✅ Regjistro'}
+                </button>
               </form>
             </div>
           )}

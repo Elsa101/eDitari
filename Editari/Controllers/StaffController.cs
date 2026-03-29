@@ -63,8 +63,13 @@ namespace Editari.Controllers
             // Remove related RefreshTokens directly
             await _context.RefreshTokens.Where(rt => rt.StaffId == id).ExecuteDeleteAsync();
 
-            _context.Staff.Remove(staff);
-            await _context.SaveChangesAsync();
+            // Detach students associated with this staff member
+            await _context.Students.Where(s => s.TeacherId == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.TeacherId, (int?)null));
+
+            // Remove the Staff directly
+            await _context.Staff.Where(s => s.StaffId == id).ExecuteDeleteAsync();
+
             return NoContent();
         }
 

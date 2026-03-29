@@ -94,10 +94,8 @@ namespace Editari.Controllers
             // 2. Remove related StudentParent links directly
             await _context.StudentParents.Where(sp => sp.ParentId == id).ExecuteDeleteAsync();
 
-            // 3. Remove the Parent
-            _context.Parents.Remove(parent);
-            
-            await _context.SaveChangesAsync();
+            // 3. Remove the Parent directly from DB to avoid entity tracking state issues
+            await _context.Parents.Where(p => p.ParentId == id).ExecuteDeleteAsync();
 
             return NoContent();
         }
