@@ -42,7 +42,7 @@ namespace eDitari.Migrations
 
                     b.HasKey("AttendanceId");
 
-                    b.ToTable("Attendances");
+                    b.ToTable("Attendances", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.Comment", b =>
@@ -68,7 +68,7 @@ namespace eDitari.Migrations
 
                     b.HasKey("CommentId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.Grade", b =>
@@ -94,7 +94,7 @@ namespace eDitari.Migrations
 
                     b.HasKey("GradeId");
 
-                    b.ToTable("Grades");
+                    b.ToTable("Grades", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.Parent", b =>
@@ -133,7 +133,7 @@ namespace eDitari.Migrations
 
                     b.HasKey("ParentId");
 
-                    b.ToTable("Parents");
+                    b.ToTable("Parents", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.RefreshToken", b =>
@@ -168,7 +168,7 @@ namespace eDitari.Migrations
 
                     b.HasKey("RefreshTokenId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.SchoolClass", b =>
@@ -185,7 +185,7 @@ namespace eDitari.Migrations
 
                     b.HasKey("ClassId");
 
-                    b.ToTable("SchoolClasses");
+                    b.ToTable("SchoolClasses", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.Staff", b =>
@@ -219,7 +219,7 @@ namespace eDitari.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.ToTable("Staff");
+                    b.ToTable("Staff", (string)null);
 
                     b.HasData(
                         new
@@ -293,7 +293,7 @@ namespace eDitari.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.StudentParent", b =>
@@ -308,7 +308,7 @@ namespace eDitari.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("StudentParent");
+                    b.ToTable("StudentParent", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.Subject", b =>
@@ -328,7 +328,7 @@ namespace eDitari.Migrations
 
                     b.HasKey("SubjectId");
 
-                    b.ToTable("Subjects");
+                    b.ToTable("Subjects", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.Teacher", b =>
@@ -365,7 +365,7 @@ namespace eDitari.Migrations
 
                     b.HasKey("TeacherId");
 
-                    b.ToTable("Teachers");
+                    b.ToTable("Teachers", (string)null);
                 });
 
             modelBuilder.Entity("Editari.Models.Staff", b =>
