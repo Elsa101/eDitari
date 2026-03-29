@@ -99,15 +99,14 @@ function Students() {
       : "-";
 
     const studentAtt = attendance.filter(a => a.studentId === studentId);
-    const attPct = studentAtt.length > 0
-      ? Math.round((studentAtt.filter(a => a.status === 'Present').length / studentAtt.length) * 100)
-      : 0;
+    const presentCount = studentAtt.filter(a => a.status === 'Present').length;
+    const absentCount = studentAtt.filter(a => a.status === 'Absent').length;
 
     const recentCom = comments
       .filter(c => c.studentId === studentId)
       .sort((a, b) => new Date(b.date) - new Date(a.date))[0]?.commentText || "Mungon";
 
-    return { avg, latest, allGrades: studentGrades, attPct, recentCom };
+    return { avg, latest, allGrades: studentGrades, allAttendance: studentAtt, presentCount, absentCount, recentCom };
   };
 
   const handleAction = (type, student) => {
@@ -146,7 +145,7 @@ function Students() {
       const payload = {
         studentId: parseInt(studentId),
         status: status,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString()
       };
       await api.post('/Attendances', payload);
       alert(`Pjesëmarrja (${status === 'Present' ? 'Prezent' : 'Mungon'}) u shënua me sukses!`);
@@ -156,6 +155,26 @@ function Students() {
       console.error("Attendance Error:", err);
       const msg = err.response?.data?.message || err.response?.data || (typeof err.response?.data === 'string' ? err.response.data : err.message);
       alert("Gabim gjatë regjistrimit të pjesëmarrjes: " + (typeof msg === 'object' ? JSON.stringify(msg) : msg)); 
+    }
+  };
+
+  const deleteGrade = async (gradeId) => {
+    if (!window.confirm("A jeni të sigurt që dëshironi ta fshini këtë notë?")) return;
+    try {
+      await api.delete(`/Grades/${gradeId}`);
+      fetchData();
+    } catch (err) {
+      alert("Gabim gjatë fshirjes së notës.");
+    }
+  };
+
+  const deleteAttendance = async (attId) => {
+    if (!window.confirm("A jeni të sigurt që dëshironi ta fshini këtë proces të pjesëmarrjes?")) return;
+    try {
+      await api.delete(`/Attendances/${attId}`);
+      fetchData();
+    } catch (err) {
+      alert("Gabim gjatë fshirjes së pjesëmarrjes.");
     }
   };
 
@@ -238,14 +257,10 @@ function Students() {
       a.date.split('T')[0] === todayStr
     );
 
-    const totalStudents = filteredStudents.length;
     const presentToday = todaysAtt.filter(a => a.status === 'Present').length;
-    
-    const attendanceTodayPct = totalStudents > 0
-      ? Math.round((presentToday / totalStudents) * 100)
-      : 0;
+    const absentToday = todaysAtt.filter(a => a.status === 'Absent').length;
 
-    return { classAvg, attendanceTodayPct };
+    return { classAvg, presentToday, absentToday };
   }, [filteredStudents, grades, attendance]);
 
   if (loading) return (
@@ -314,8 +329,15 @@ function Students() {
         <div className="stat-card">
           <ClipboardCheck className="stat-icon green" />
           <div className="stat-info">
-            <span>Pjesëmarrja Sot</span>
-            <h3>{statsSummary.attendanceTodayPct}%</h3>
+            <span>Prezent Sot</span>
+            <h3>{statsSummary.presentToday}</h3>
+          </div>
+        </div>
+        <div className="stat-card">
+          <X className="stat-icon red" />
+          <div className="stat-info">
+            <span>Mungojnë Sot</span>
+            <h3>{statsSummary.absentToday}</h3>
           </div>
         </div>
         <div className="stat-card">
@@ -380,6 +402,7 @@ function Students() {
                               <span className={`grade-value-small ${g.gradeValue >= 4 ? 'high' : 'low'}`}>
                                 {g.gradeValue}
                               </span>
+                              <button className="delete-mini" onClick={() => deleteGrade(g.gradeId)}>×</button>
                             </div>
                           ))
                         ) : (
@@ -394,15 +417,13 @@ function Students() {
                       </div>
                     </td>
                     <td>
-                      <div className="att-container">
-                        <div className="progress-bar">
-                          <motion.div 
-                            className="progress-fill" 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${stats.attPct}%` }}
-                          />
+                      <div className="att-summary-vertical">
+                        <div className="att-count present" onClick={() => handleAction('view-attendance', s)}>
+                          <Check size={12} /> {stats.presentCount} Prezent
                         </div>
-                        <span className="att-label">{stats.attPct}%</span>
+                        <div className="att-count absent" onClick={() => handleAction('view-attendance', s)}>
+                          <X size={12} /> {stats.absentCount} Mungon
+                        </div>
                       </div>
                     </td>
                     <td>
@@ -465,10 +486,33 @@ function Students() {
                 {activeModal === 'grade' && `Shto Notë - ${selectedStudent?.name}`}
                 {activeModal === 'comment' && `Koment i Ri - ${selectedStudent?.name}`}
                 {activeModal === 'edit' && 'Regjistro Nxënës'}
+                {activeModal === 'view-attendance' && `Historia e Pjesëmarrjes - ${selectedStudent?.name}`}
               </h3>
               <button className="btn-close" onClick={() => setActiveModal(null)}><X /></button>
             </div>
-            <form onSubmit={submitModal} className="modal-body">
+            <div className="modal-body shadow-inner">
+               {activeModal === 'view-attendance' && (
+                 <div className="att-history-list">
+                    {getStats(selectedStudent.studentId).allAttendance.length > 0 ? (
+                      getStats(selectedStudent.studentId).allAttendance
+                        .sort((a,b) => new Date(b.date) - new Date(a.date))
+                        .map(a => (
+                        <div key={a.attendanceId} className="att-history-item">
+                           <div className="att-info">
+                              <span className={`att-status-dot ${a.status === 'Present' ? 'present' : 'absent'}`}></span>
+                              <span className="att-date">{new Date(a.date).toLocaleDateString('sq-AL', { day:'2-digit', month:'short', year:'numeric' })}</span>
+                              <span className="att-status-text">{a.status === 'Present' ? 'Prezent' : 'Mungon'}</span>
+                           </div>
+                           <button className="btn-icon-delete" onClick={() => deleteAttendance(a.attendanceId)}>
+                              <Trash2 size={16} />
+                           </button>
+                        </div>
+                      ))
+                    ) : <p className="text-center text-muted">Nuk ka të dhëna për pjesëmarrjen.</p>}
+                 </div>
+               )}
+
+              <form onSubmit={submitModal}>
               {activeModal === 'grade' && (
                 <div className="form-stack">
                   <div className="field">
@@ -550,6 +594,7 @@ function Students() {
                 </button>
               </div>
             </form>
+            </div>
           </motion.div>
         </div>
       )}
